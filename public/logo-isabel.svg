@@ -1,12 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 130" role="img" aria-labelledby="title">
-<title id="title">Isabel Valenzuela Bienes Raíces</title>
-<g fill="none" stroke="#c6a46b" stroke-width="2.3" stroke-linecap="square">
- <path d="M14 64 64 14l50 50-50 50z"/>
- <path d="M40 40v49M53 28v73M70 36l15 43 15-43"/>
- <path d="M31 99h66" stroke-width="1"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 130" role="img" aria-labelledby="t d">
+<title id="t">Isabel Valenzuela</title><desc id="d">Monograma IV con silueta arquitectónica dorada, tipografía clásica e identidad de bienes raíces</desc>
+<g fill="none" stroke="#d3ae72" stroke-width="3.1" stroke-linejoin="round">
+  <path d="M11 53 61 13l50 40" stroke-width="3.8"/>
+  <path d="M27 51 61 24l34 27" stroke-width="1.6" opacity=".8"/>
+  <path d="M19 103h85"/>
+  <path d="M39 48v48" stroke-width="4.5"/>
+  <path d="M52 47v49" stroke-width="2.4"/>
+  <path d="m64 48 16 47 16-47" stroke-width="5"/>
+  <path d="M62 16v-9" stroke-width="1.5" opacity=".6"/>
 </g>
-<text x="139" y="62" fill="#ffffff" font-family="Georgia,serif" font-size="32" letter-spacing="2.8">ISABEL</text>
-<text x="139" y="94" fill="#ffffff" font-family="Georgia,serif" font-size="32" letter-spacing="2.4">VALENZUELA</text>
-<path d="M139 108H497" stroke="#c6a46b" stroke-width="1.2"/>
-<text x="141" y="124" fill="#c6a46b" font-family="Arial,sans-serif" font-size="9" letter-spacing="4.2">BIENES RAÍCES</text>
+<path d="M122 18v92" stroke="#d3ae72" stroke-width="1" opacity=".6"/>
+<text x="141" y="58" font-size="36" fill="#ffffff" font-family="Georgia,'Times New Roman',serif" letter-spacing="2.3">ISABEL</text>
+<text x="141" y="96" font-size="36" fill="#ffffff" font-family="Georgia,'Times New Roman',serif" letter-spacing="1.4">VALENZUELA</text>
+<path d="M142 108h357" stroke="#d3ae72" stroke-width="1" opacity=".8"/>
+<text x="143" y="125" fill="#d3ae72" font-family="Arial,sans-serif" font-size="9.5" letter-spacing="4.2">AGENTE INMOBILIARIA</text>
 </svg>
