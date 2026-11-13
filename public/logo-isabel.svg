@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 130" role="img" aria-labelledby="title">
+<title id="title">Isabel Valenzuela Bienes Raíces</title>
+<g fill="none" stroke="#c6a46b" stroke-width="2.3" stroke-linecap="square">
+ <path d="M14 64 64 14l50 50-50 50z"/>
+ <path d="M40 40v49M53 28v73M70 36l15 43 15-43"/>
+ <path d="M31 99h66" stroke-width="1"/>
+</g>
+<text x="139" y="62" fill="#ffffff" font-family="Georgia,serif" font-size="32" letter-spacing="2.8">ISABEL</text>
+<text x="139" y="94" fill="#ffffff" font-family="Georgia,serif" font-size="32" letter-spacing="2.4">VALENZUELA</text>
+<path d="M139 108H497" stroke="#c6a46b" stroke-width="1.2"/>
+<text x="141" y="124" fill="#c6a46b" font-family="Arial,sans-serif" font-size="9" letter-spacing="4.2">BIENES RAÍCES</text>
+</svg>
