@@ -143,6 +143,22 @@ export default function AdminPage() {
     catch { setError("No se pudo cambiar la publicación."); }
   }
 
+  async function uploadSiteImage(field: "heroImage" | "aboutImage", file?: File) {
+    if (!file || !storage || saving) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size >= 8 * 1024 * 1024) {
+      setError("Selecciona una foto JPEG, PNG o WebP menor de 8 MB."); return;
+    }
+    setSaving(true); setError(""); setNotice("");
+    try {
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const imageRef = ref(storage, `site-images/${field}-${Date.now()}-${safeName}`);
+      await uploadBytes(imageRef, file, { contentType: file.type });
+      siteChange(field, await getDownloadURL(imageRef));
+      flash("Imagen subida a Storage. Pulsa «Publicar cambios» para mostrarla en la web.");
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "No se pudo subir la imagen."); }
+    finally { setSaving(false); }
+  }
+
   async function saveSite(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!db || saving) return;
@@ -231,9 +247,10 @@ export default function AdminPage() {
             <label className="span-2">Titular principal <textarea rows={2} value={site.heroTitle} onChange={e => siteChange("heroTitle", e.target.value)}/></label>
             <label className="span-2">Texto de apoyo <textarea rows={3} value={site.heroSubtitle} onChange={e => siteChange("heroSubtitle", e.target.value)}/></label>
             <label className="span-2">URL HTTPS de la fotografía de portada <input value={site.heroImage} onChange={e => siteChange("heroImage", e.target.value)}/></label>
+            <label className="span-2">O subir imagen de portada desde tu equipo <input type="file" accept="image/jpeg,image/png,image/webp" onChange={e => void uploadSiteImage("heroImage", e.target.files?.[0])}/></label>
           </div></div>
           <div className="admin-panel"><h3>Presentación del sitio</h3><div className="form-grid"><label className="span-2">Título de introducción <input value={site.introTitle} onChange={e => siteChange("introTitle", e.target.value)}/></label><label className="span-2">Descripción de introducción <textarea rows={3} value={site.introDescription} onChange={e => siteChange("introDescription", e.target.value)}/></label></div></div>
-          <div className="admin-panel"><h3>Sobre Isabel</h3><div className="form-grid"><label className="span-2">Titular <input value={site.aboutTitle} onChange={e => siteChange("aboutTitle", e.target.value)}/></label><label className="span-2">Biografía / presentación <textarea rows={5} value={site.aboutDescription} onChange={e => siteChange("aboutDescription", e.target.value)}/></label><label className="span-2">URL HTTPS de imagen de sección <input value={site.aboutImage} onChange={e => siteChange("aboutImage", e.target.value)}/></label></div></div>
+          <div className="admin-panel"><h3>Sobre Isabel</h3><div className="form-grid"><label className="span-2">Titular <input value={site.aboutTitle} onChange={e => siteChange("aboutTitle", e.target.value)}/></label><label className="span-2">Biografía / presentación <textarea rows={5} value={site.aboutDescription} onChange={e => siteChange("aboutDescription", e.target.value)}/></label><label className="span-2">URL HTTPS de imagen de sección <input value={site.aboutImage} onChange={e => siteChange("aboutImage", e.target.value)}/></label><label className="span-2">O subir imagen para esta sección <input type="file" accept="image/jpeg,image/png,image/webp" onChange={e => void uploadSiteImage("aboutImage", e.target.files?.[0])}/></label></div></div>
           <div className="admin-panel"><h3>Contacto y cobertura</h3><p className="admin-hint">Los botones de contacto aparecen automáticamente cuando configuras WhatsApp o correo reales.</p><div className="form-grid">
             <label>WhatsApp (código de país, sin signos) <input value={site.whatsapp} onChange={e => siteChange("whatsapp", e.target.value)} placeholder="505XXXXXXXX"/></label>
             <label>Correo de consultas <input type="email" value={site.email} onChange={e => siteChange("email", e.target.value)} placeholder="correo@dominio.com"/></label>
