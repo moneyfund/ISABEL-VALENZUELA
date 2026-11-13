@@ -38,8 +38,8 @@ export default function Home() {
     <section id="inicio" className="hero hero--v2">
       <div className="hero__gallery" aria-hidden="true">
         <img src={validImage(site.heroImage) ? site.heroImage : defaultSite.heroImage} alt="" className="hero__frame hero__frame--one" />
-        <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1900&q=85" alt="" className="hero__frame hero__frame--two" />
-        <img src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1900&q=85" alt="" className="hero__frame hero__frame--three" />
+        <img src={validImage(site.heroImage2) ? site.heroImage2 : defaultSite.heroImage2} alt="" className="hero__frame hero__frame--two" />
+        <img src={validImage(site.heroImage3) ? site.heroImage3 : defaultSite.heroImage3} alt="" className="hero__frame hero__frame--three" />
       </div>
       <div className="hero__scrim hero__scrim--v2" />
       <div className="hero__architecture" aria-hidden="true">

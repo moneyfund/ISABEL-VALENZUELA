@@ -52,3 +52,18 @@ La foto compartida por Isabel está integrada como `public/isabel-valenzuela.web
 5. Publicar las propiedades reales. Hasta entonces se muestran fichas **DEMO** sin grabarlas en Firestore.
 
 **Despliegue Vercel:** el código funciona con la configuración pública de Firebase que ya se incluye. No se requieren variables de entorno para este proyecto concreto, aunque se recomienda configurarlas desde Vercel para mantener todos los entornos explícitos. No se debe afirmar que el panel está operativo hasta activar los servicios de Firebase y aplicar las reglas.
+
+## Navegación multipágina y redes sociales (2026-11-13)
+Rutas independientes con enlaces permanentes:
+- `/` — Inicio editorial y selección de propiedades.
+- `/propiedades` — Catálogo filtrable y búsqueda por ubicación.
+- `/servicios` — Servicios y proceso.
+- `/sobre-isabel` — Perfil profesional y fotografía oficial.
+- `/contacto` — Canales de contacto oficiales.
+- `/admin` — Panel privado para publicar inmuebles y actualizar el contenido.
+
+El hero incorpora una secuencia suave de tres fotografías, acentos arquitectónicos animados, fotografía de Isabel, botones de acción y buscador conectado al catálogo. El comportamiento respeta `prefers-reduced-motion`.
+
+En `/admin` → **Contenido del sitio** se configuran Facebook, Instagram, TikTok y número de WhatsApp (con prefijo). Solo se admiten enlaces HTTPS de los dominios oficiales; los enlaces vacíos aparecen como pendientes, **sin inventar perfiles ni números**. Se editarán asimismo tres imágenes del hero mediante URL o Storage.
+
+**Despliegue único**: conservar el proyecto existente `isabelvalenzuela` en Vercel con repositorio `moneyfund/ISABEL-VALENZUELA`, rama de producción `main`. La tarjeta «New repository detected» de Vercel es un aviso de importación, no un segundo despliegue. No importarlo otra vez. Al integrar cambios en `main`, el proyecto vinculado puede generar despliegues automáticamente.

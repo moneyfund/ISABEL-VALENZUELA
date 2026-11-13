@@ -27,6 +27,8 @@ export interface SiteContent {
   heroTitle: string;
   heroSubtitle: string;
   heroImage: string;
+  heroImage2: string;
+  heroImage3: string;
   introTitle: string;
   introDescription: string;
   aboutTitle: string;
@@ -45,6 +47,8 @@ export const defaultSite: SiteContent = {
   heroTitle: "Espacios que inspiran. Decisiones que trascienden.",
   heroSubtitle: "Acompañamiento inmobiliario cercano, criterio profesional y una selección pensada para tu próxima etapa.",
   heroImage: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=2200&q=85",
+  heroImage2: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1900&q=85",
+  heroImage3: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1900&q=85",
   introTitle: "Cada propiedad es el comienzo de una historia.",
   introDescription: "Explora espacios con potencial y encuentra asesoría personal durante cada etapa de tu decisión inmobiliaria.",
   aboutTitle: "Soy Isabel Valenzuela. Tu siguiente paso comienza con confianza.",

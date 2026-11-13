@@ -29,7 +29,8 @@ export function whatsappUrl(input: string | undefined, message = "Hola Isabel, m
 
 export function contactEmail(value: string | undefined): string | null {
   const email = (value ?? "").trim();
-  return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email) ? email : null;
+  const re = new RegExp("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+  return re.test(email) ? email : null;
 }
 
 export function socialChannels(site: SiteContent) {

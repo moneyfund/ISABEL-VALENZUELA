@@ -12,6 +12,8 @@ import {
 import { auth, db, firebaseReady, storage } from "@/lib/firebase";
 import { defaultSite, type Property, type PropertyCategory, type SiteContent, type Operation } from "@/lib/models";
 import { cleanPropertyId, money, validImage } from "@/lib/format";
+import { contactEmail, safeSocialUrl, whatsappUrl } from "@/lib/social";
+import SocialLinks from "@/components/SocialLinks";
 
 type Gate = "checking" | "setup" | "guest" | "pending" | "admin";
 type Tab = "overview" | "properties" | "content";
@@ -143,7 +145,7 @@ export default function AdminPage() {
     catch { setError("No se pudo cambiar la publicación."); }
   }
 
-  async function uploadSiteImage(field: "heroImage" | "aboutImage", file?: File) {
+  async function uploadSiteImage(field: "heroImage" | "heroImage2" | "heroImage3" | "aboutImage", file?: File) {
     if (!file || !storage || saving) return;
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size >= 8 * 1024 * 1024) {
       setError("Selecciona una foto JPEG, PNG o WebP menor de 8 MB."); return;
@@ -162,11 +164,29 @@ export default function AdminPage() {
   async function saveSite(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!db || saving) return;
+    const invalidLinks = [
+      { name: "Facebook", value: site.facebook, ok: safeSocialUrl("facebook", site.facebook) },
+      { name: "Instagram", value: site.instagram, ok: safeSocialUrl("instagram", site.instagram) },
+      { name: "TikTok", value: site.tiktok, ok: safeSocialUrl("tiktok", site.tiktok) }
+    ].filter(item => item.value?.trim() && !item.ok);
+    if (invalidLinks.length) {
+      setError(`El enlace de ${invalidLinks[0].name} debe ser una dirección HTTPS válida de esa red social.`);
+      return;
+    }
+    if (site.whatsapp.trim() && !whatsappUrl(site.whatsapp)) {
+      setError("Introduce un número de WhatsApp válido con código de país (8 a 15 dígitos).");
+      return;
+    }
+    if (site.email.trim() && !contactEmail(site.email)) {
+      setError("Introduce un correo electrónico válido."); return;
+    }
     setSaving(true); setError(""); setNotice("");
     try {
       await setDoc(doc(db, "site", "public"), {
         ...site,
         heroImage: validImage(site.heroImage) ? site.heroImage : defaultSite.heroImage,
+        heroImage2: validImage(site.heroImage2) ? site.heroImage2 : defaultSite.heroImage2,
+        heroImage3: validImage(site.heroImage3) ? site.heroImage3 : defaultSite.heroImage3,
         aboutImage: validImage(site.aboutImage) ? site.aboutImage : defaultSite.aboutImage
       });
       flash("Contenido del sitio actualizado. Los cambios ya se reflejan en la web.");
@@ -248,15 +268,26 @@ export default function AdminPage() {
             <label className="span-2">Texto de apoyo <textarea rows={3} value={site.heroSubtitle} onChange={e => siteChange("heroSubtitle", e.target.value)}/></label>
             <label className="span-2">URL HTTPS de la fotografía de portada <input value={site.heroImage} onChange={e => siteChange("heroImage", e.target.value)}/></label>
             <label className="span-2">O subir imagen de portada desde tu equipo <input type="file" accept="image/jpeg,image/png,image/webp" onChange={e => void uploadSiteImage("heroImage", e.target.files?.[0])}/></label>
+            <label className="span-2">Segunda fotografía del hero (URL HTTPS) <input value={site.heroImage2} onChange={e => siteChange("heroImage2", e.target.value)}/></label>
+            <label className="span-2">O subir segunda fotografía <input type="file" accept="image/jpeg,image/png,image/webp" onChange={e => void uploadSiteImage("heroImage2", e.target.files?.[0])}/></label>
+            <label className="span-2">Tercera fotografía del hero (URL HTTPS) <input value={site.heroImage3} onChange={e => siteChange("heroImage3", e.target.value)}/></label>
+            <label className="span-2">O subir tercera fotografía <input type="file" accept="image/jpeg,image/png,image/webp" onChange={e => void uploadSiteImage("heroImage3", e.target.files?.[0])}/></label>
           </div></div>
           <div className="admin-panel"><h3>Presentación del sitio</h3><div className="form-grid"><label className="span-2">Título de introducción <input value={site.introTitle} onChange={e => siteChange("introTitle", e.target.value)}/></label><label className="span-2">Descripción de introducción <textarea rows={3} value={site.introDescription} onChange={e => siteChange("introDescription", e.target.value)}/></label></div></div>
           <div className="admin-panel"><h3>Sobre Isabel</h3><div className="form-grid"><label className="span-2">Titular <input value={site.aboutTitle} onChange={e => siteChange("aboutTitle", e.target.value)}/></label><label className="span-2">Biografía / presentación <textarea rows={5} value={site.aboutDescription} onChange={e => siteChange("aboutDescription", e.target.value)}/></label><label className="span-2">URL HTTPS de imagen de sección <input value={site.aboutImage} onChange={e => siteChange("aboutImage", e.target.value)}/></label><label className="span-2">O subir imagen para esta sección <input type="file" accept="image/jpeg,image/png,image/webp" onChange={e => void uploadSiteImage("aboutImage", e.target.files?.[0])}/></label></div></div>
-          <div className="admin-panel"><h3>Contacto y cobertura</h3><p className="admin-hint">Los botones de contacto aparecen automáticamente cuando configuras WhatsApp o correo reales.</p><div className="form-grid">
-            <label>WhatsApp (código de país, sin signos) <input value={site.whatsapp} onChange={e => siteChange("whatsapp", e.target.value)} placeholder="505XXXXXXXX"/></label>
+          <div className="admin-panel"><h3>Contacto y cobertura</h3><p className="admin-hint">El correo y la zona de servicio se mostrarán en las páginas públicas.</p><div className="form-grid">
             <label>Correo de consultas <input type="email" value={site.email} onChange={e => siteChange("email", e.target.value)} placeholder="correo@dominio.com"/></label>
-            <label>Instagram (URL HTTPS) <input value={site.instagram} onChange={e => siteChange("instagram", e.target.value)} placeholder="https://instagram.com/..."/></label>
             <label>Área de atención <input value={site.serviceArea} onChange={e => siteChange("serviceArea", e.target.value)}/></label>
           </div></div>
+          <div className="admin-panel"><h3>Redes sociales y WhatsApp</h3><p className="admin-hint">Escribe los enlaces oficiales de Isabel. Los botones del menú flotante, el pie de página y Contacto se activan al publicar cambios. Los que dejes vacíos aparecerán como pendientes.</p>
+            <div className="form-grid">
+              <label>Facebook · URL HTTPS <input type="url" value={site.facebook} onChange={e => siteChange("facebook", e.target.value)} placeholder="https://www.facebook.com/perfil"/></label>
+              <label>Instagram · URL HTTPS <input type="url" value={site.instagram} onChange={e => siteChange("instagram", e.target.value)} placeholder="https://www.instagram.com/perfil"/></label>
+              <label>TikTok · URL HTTPS <input type="url" value={site.tiktok} onChange={e => siteChange("tiktok", e.target.value)} placeholder="https://www.tiktok.com/@perfil"/></label>
+              <label>WhatsApp · teléfono con prefijo internacional <input type="tel" value={site.whatsapp} onChange={e => siteChange("whatsapp", e.target.value)} placeholder="505XXXXXXXX"/></label>
+            </div>
+            <div className="admin-social-preview"><span>VISTA PREVIA DE ICONOS</span><SocialLinks site={site} showLabels className="social-links--admin"/></div>
+          </div>
           <div className="admin-form__actions"><button type="submit" disabled={saving} className="btn btn--dark">{saving ? "Guardando..." : "Publicar cambios"} <Save size={18}/></button></div>
         </form>
       </div>}
