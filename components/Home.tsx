@@ -50,7 +50,7 @@ export default function Home() {
         <img src={validImage(site.heroImage) ? site.heroImage : defaultSite.heroImage} alt="" />
       </div>
       <div className="iv-hero__portrait-wrap">
-        <img src="/isabel-valenzuela.webp" alt="Isabel Valenzuela, agente inmobiliaria" className="iv-hero__portrait" fetchPriority="high" />
+        <img src="https://d2ol7oe51mr4n9.cloudfront.net/user_3KniZP3dkw5KyzASdx6oDnrJPeH/232c4026-f827-4bf9-9516-e730cd0b2727.jpg" alt="Isabel Valenzuela, agente inmobiliaria" className="iv-hero__portrait" width={1024} height={1014} fetchPriority="high" decoding="async" />
         <span className="iv-hero__portrait-label">Isabel Valenzuela</span>
       </div>
       <div className="container iv-hero__container">
