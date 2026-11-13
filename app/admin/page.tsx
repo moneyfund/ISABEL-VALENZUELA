@@ -2,20 +2,21 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, type User } from "firebase/auth";
-import { collection, deleteDoc, doc, getDoc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
+import { getIdTokenResult, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, type User } from "firebase/auth";
+import { collection, deleteDoc, doc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import {
   ArrowLeft, ArrowUpRight, Building2, CheckCircle2, CloudUpload, FilePenLine,
   Globe2, ImagePlus, LayoutDashboard, LogOut, Plus, Save, ShieldAlert, Trash2, X
 } from "lucide-react";
 import { auth, db, firebaseReady, storage } from "@/lib/firebase";
-import { defaultSite, type Property, type PropertyCategory, type SiteContent, type Operation } from "@/lib/models";
+import { defaultSite, normalizeSiteContent, type Property, type PropertyCategory, type SiteContent, type Operation } from "@/lib/models";
 import { cleanPropertyId, money, validImage } from "@/lib/format";
 import { contactEmail, safeSocialUrl, whatsappUrl } from "@/lib/social";
 import SocialLinks from "@/components/SocialLinks";
+import { isAllowedAdminEmail } from "@/lib/admin-access";
 
-type Gate = "checking" | "setup" | "guest" | "pending" | "admin";
+type Gate = "checking" | "setup" | "guest" | "denied" | "admin";
 type Tab = "overview" | "properties" | "content";
 
 const emptyProperty = (): Property => ({
@@ -50,19 +51,27 @@ export default function AdminPage() {
       setGate(signedIn ? "checking" : "guest");
       if (!signedIn) return;
       try {
-        const adminDoc = await getDoc(doc(db!, "admins", signedIn.uid));
+        const token = await getIdTokenResult(signedIn);
         if (!active) return;
-        if (!adminDoc.exists()) { setGate("pending"); return; }
+        // The email is only an initial UI check; backend rules repeat the
+        // same whitelist with a verified Google sign-in token.
+        const authorized = signedIn.emailVerified
+          && isAllowedAdminEmail(signedIn.email)
+          && token.signInProvider === "google.com";
+        if (!authorized) {
+          setGate("denied");
+          return;
+        }
         setGate("admin");
         unsubProperties = onSnapshot(collection(db!, "properties"), snapshot => {
           setProperties(snapshot.docs.map(entry => ({ ...entry.data(), id: entry.id } as Property))
             .sort((a, b) => b.createdAt - a.createdAt));
-        }, () => setError("No se pudieron sincronizar las propiedades."));
+        }, () => setError("No se pudieron sincronizar las propiedades. Comprueba las reglas de Firestore."));
         unsubSite = onSnapshot(doc(db!, "site", "public"), snapshot => {
-          setSite({ ...defaultSite, ...(snapshot.exists() ? snapshot.data() : {}) });
-        }, () => setError("No se pudo sincronizar el contenido."));
+          setSite(normalizeSiteContent(snapshot.exists() ? snapshot.data() : null));
+        }, () => setError("No se pudo sincronizar el contenido. Comprueba las reglas de Firestore."));
       } catch {
-        if (active) { setGate("pending"); setError("No fue posible verificar el permiso de administrador."); }
+        if (active) { setGate("denied"); setError("No fue posible verificar los permisos de esta cuenta."); }
       }
     });
     return () => { active = false; stopAuth(); unsubProperties?.(); unsubSite?.(); };
@@ -200,7 +209,7 @@ export default function AdminPage() {
       {gate === "checking" ? <><p className="eyebrow eyebrow--gold">VERIFICANDO ACCESO</p><h1>Un momento.</h1><p>Validando tu cuenta con Firebase.</p></> :
       gate === "setup" ? <><ShieldAlert size={38} /><p className="eyebrow eyebrow--gold">CONFIGURACIÓN PENDIENTE</p><h1>Conecta Firebase para activar la administración.</h1><p>La web pública funciona en modo demostración. Añade las variables de Firebase, habilita Google Authentication y despliega las reglas de seguridad.</p><code>NEXT_PUBLIC_FIREBASE_*</code></> :
       gate === "guest" ? <><p className="eyebrow eyebrow--gold">ACCESO PRIVADO</p><h1>Tu espacio de gestión.</h1><p>Inicia sesión con la cuenta Google autorizada para administrar propiedades, imágenes y contenido.</p><button className="btn btn--gold" onClick={login}>Entrar con Google <ArrowUpRight size={18}/></button></> :
-      <><ShieldAlert size={34}/><p className="eyebrow eyebrow--gold">PERMISO REQUERIDO</p><h1>Tu cuenta todavía no está autorizada.</h1><p>Para habilitar el acceso, crea manualmente este documento en Firestore desde Firebase Console:</p><code>admins/{user?.uid}</code><p>Después, actualiza la página. Solo el propietario del proyecto Firebase puede conceder este permiso.</p><button className="btn btn--outline-dark" onClick={() => auth && signOut(auth)}>Cambiar de cuenta</button></>}
+      <><ShieldAlert size={34}/><p className="eyebrow eyebrow--gold">ACCESO RESTRINGIDO</p><h1>Esta cuenta no tiene permisos de administración.</h1><p>El panel está reservado a las dos cuentas autorizadas de Google para Isabel Valenzuela. Inicia sesión con una de ellas.</p><button className="btn btn--outline-dark" onClick={() => auth && signOut(auth)}>Cambiar de cuenta</button></>}
       {error && <p className="admin-message admin-message--error" role="alert">{error}</p>}
       <Link href="/" className="admin-access__back"><ArrowLeft size={17} /> Volver al sitio público</Link>
     </div>
