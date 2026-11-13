@@ -1,17 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 130" role="img" aria-labelledby="t d">
-<title id="t">Isabel Valenzuela</title><desc id="d">Monograma IV con silueta arquitectónica dorada, tipografía clásica e identidad de bienes raíces</desc>
-<g fill="none" stroke="#d3ae72" stroke-width="3.1" stroke-linejoin="round">
-  <path d="M11 53 61 13l50 40" stroke-width="3.8"/>
-  <path d="M27 51 61 24l34 27" stroke-width="1.6" opacity=".8"/>
-  <path d="M19 103h85"/>
-  <path d="M39 48v48" stroke-width="4.5"/>
-  <path d="M52 47v49" stroke-width="2.4"/>
-  <path d="m64 48 16 47 16-47" stroke-width="5"/>
-  <path d="M62 16v-9" stroke-width="1.5" opacity=".6"/>
-</g>
-<path d="M122 18v92" stroke="#d3ae72" stroke-width="1" opacity=".6"/>
-<text x="141" y="58" font-size="36" fill="#ffffff" font-family="Georgia,'Times New Roman',serif" letter-spacing="2.3">ISABEL</text>
-<text x="141" y="96" font-size="36" fill="#ffffff" font-family="Georgia,'Times New Roman',serif" letter-spacing="1.4">VALENZUELA</text>
-<path d="M142 108h357" stroke="#d3ae72" stroke-width="1" opacity=".8"/>
-<text x="143" y="125" fill="#d3ae72" font-family="Arial,sans-serif" font-size="9.5" letter-spacing="4.2">AGENTE INMOBILIARIA</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 110" role="img" aria-labelledby="iv-title iv-desc">
+  <title id="iv-title">Isabel Valenzuela, Agente Inmobiliaria</title>
+  <desc id="iv-desc">Monograma IV de líneas precisas bajo una cubierta arquitectónica recta.</desc>
+  <g fill="none" stroke="#D5B57B" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M14 39 L49 12 L84 39" stroke-width="3.5"/>
+    <path d="M22 42 H76" stroke-width="1" opacity=".65"/>
+    <path d="M25 50 V88" stroke-width="5.5"/>
+    <path d="M39 50 L53 88 L67 50" stroke-width="5.5"/>
+    <path d="M14 98 H84" stroke-width="1" opacity=".55"/>
+  </g>
+  <path d="M101 20 V94" stroke="#D5B57B" stroke-width="1" opacity=".55"/>
+  <text x="123" y="50" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-weight="400" letter-spacing="2.4" fill="#F6F2E9">ISABEL</text>
+  <text x="123" y="80" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="400" letter-spacing="1.65" fill="#F6F2E9">VALENZUELA</text>
+  <path d="M123 91 H454" stroke="#D5B57B" stroke-width=".9" opacity=".85"/>
+  <text x="124" y="105" font-family="Arial, sans-serif" font-size="9" font-weight="500" letter-spacing="3" fill="#D5B57B">AGENTE INMOBILIARIA</text>
 </svg>
