@@ -55,9 +55,23 @@ export const defaultSite: SiteContent = {
   aboutDescription: "Te acompaño a explorar oportunidades inmobiliarias en Nicaragua con una atención cercana, transparente y enfocada en tus objetivos. Cada decisión merece tiempo, información clara y un trato verdaderamente personal.",
   aboutImage: "/isabel-valenzuela.webp",
   serviceArea: "Nicaragua",
-  whatsapp: "",
+  whatsapp: "50557251888",
   email: "",
   instagram: "",
   facebook: "",
   tiktok: ""
 };
+
+/**
+ * Backward compatible defaults for documents saved before official contact was set.
+ * Empty or absent WhatsApp from an older Firestore record uses the current official number.
+ */
+export function normalizeSiteContent(source: Partial<SiteContent> | null | undefined): SiteContent {
+  const site = { ...defaultSite, ...(source || {}) };
+  return {
+    ...site,
+    whatsapp: typeof site.whatsapp === "string" && site.whatsapp.trim()
+      ? site.whatsapp.trim()
+      : defaultSite.whatsapp
+  };
+}

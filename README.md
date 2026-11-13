@@ -5,10 +5,10 @@ Plataforma inmobiliaria de Isabel Valenzuela, creada por XARCON con **Next.js 16
 ## Qué incluye
 - Sitio público responsive: inicio editorial, catálogo con filtros, fichas individuales, contacto por WhatsApp o correo, animaciones y SEO.
 - Identidad visual propia (azul petróleo, blanco, dorado), logotipo vectorial y favicon.
-- Panel privado en `/admin`: inicio con Google, autorización mediante `admins/{uid}`, creación/edición/eliminación de inmuebles, publicación y carga de imágenes a Firebase Storage.
+- Panel privado en `/admin`: inicio con Google, autorización mediante dos correos de Google verificados, creación/edición/eliminación de inmuebles, publicación y carga de imágenes a Firebase Storage.
 - Editor de contenido institucional, héroe, fotografía, zonas de atención y canales de contacto.
-- Modo vista previa sin Firebase con inmuebles **ficticios y rotulados DEMO**. Cuando Firebase está configurado, **NO** muestra datos falsos si la colección está vacía.
-- Reglas seguras para Firestore y Storage. El panel no acepta usuarios que no estén registrados en `admins`.
+- Modo demostración con inmuebles **ficticios y rotulados DEMO** mientras no existan propiedades publicadas.
+- Reglas seguras para Firestore y Storage. El panel solo acepta las dos cuentas de Google autorizadas y verificadas.
 
 ## Configurar
 1. Instala Node 20.9+ y ejecuta `npm install` y `npm run dev`.
@@ -16,13 +16,13 @@ Plataforma inmobiliaria de Isabel Valenzuela, creada por XARCON con **Next.js 16
 3. En Firebase Authentication, habilita **Google** y agrega el dominio de Vercel a **Authorized domains**.
 4. Crea una base Firestore (Native mode) y un bucket de Cloud Storage.
 5. Publica las reglas con `firebase deploy --only firestore:rules,storage` (tras asociar el proyecto con Firebase CLI) o copia los archivos `firestore.rules` y `storage.rules` a sus consolas respectivas.
-6. Accede a `/admin` con Google. Copia el UID que muestra la pantalla de acceso pendiente y crea **manualmente desde Firebase Console** el documento `admins/EL_UID` (puede contener `role: "owner"`). No hay auto-registro de administradores. Actualiza la página.
-7. En Vercel importa el repositorio, selecciona framework Next.js, añade las mismas `NEXT_PUBLIC_FIREBASE_*` variables y despliega. No necesitas servidor propio. Ajusta los dominios autorizados en Firebase Authentication.
+6. Accede a `/admin` con Google utilizando exclusivamente `norvingarcia220@gmail.com` o `valenzuela.ing120@gmail.com`. No necesitas documentos `admins/{uid}`. Aplica las reglas antes de publicar.
+7. Conserva el proyecto Vercel existente `isabelvalenzuela`; está vinculado al repositorio en `main`. Evita importar una copia. Ajusta los dominios autorizados en Firebase Authentication.
 
 ## Estructura de datos
 `properties/{id}`: título, ubicación, operación, tipo, precio USD, área, dormitorios, baños, fotos, descripción, atributos, destacada y publicada.
-`site/public`: identidad textual, mensaje principal, imágenes, biografía, áreas de servicio, email, WhatsApp e Instagram.
-`admins/{uid}`: documentos provisionados fuera de la app que conceden acceso al panel.
+`site/public`: identidad textual, mensaje principal, imágenes, biografía, áreas de servicio, correo, WhatsApp, Facebook, TikTok e Instagram.
+Autorización de administradores: lista explícita de dos correos verificados en reglas de Firestore y Storage. No se usa colección `admins`.
 
 ## Seguridad y operación
 - Los ejemplos son únicamente de presentación; no son inmuebles en oferta y nunca se envían como registros a Firestore.
@@ -48,7 +48,7 @@ La foto compartida por Isabel está integrada como `public/isabel-valenzuela.web
 1. Habilitar Google Sign-In en Firebase Authentication.
 2. Agregar el dominio desplegado a Authentication → Settings → Authorized domains.
 3. Crear Firestore y Cloud Storage y aplicar `firestore.rules` y `storage.rules`. Tener un proyecto Firebase y la configuración del SDK no crea por sí solo los servicios ni instala las reglas.
-4. Aprovisionar manualmente cada administrador por UID en la colección `admins`.
+4. Verificar que el inicio de sesión con Google funciona para `norvingarcia220@gmail.com` y `valenzuela.ing120@gmail.com` y que otras cuentas no pueden crear, editar ni consultar borradores.
 5. Publicar las propiedades reales. Hasta entonces se muestran fichas **DEMO** sin grabarlas en Firestore.
 
 **Despliegue Vercel:** el código funciona con la configuración pública de Firebase que ya se incluye. No se requieren variables de entorno para este proyecto concreto, aunque se recomienda configurarlas desde Vercel para mantener todos los entornos explícitos. No se debe afirmar que el panel está operativo hasta activar los servicios de Firebase y aplicar las reglas.
@@ -64,6 +64,12 @@ Rutas independientes con enlaces permanentes:
 
 El hero incorpora una secuencia suave de tres fotografías, acentos arquitectónicos animados, fotografía de Isabel, botones de acción y buscador conectado al catálogo. El comportamiento respeta `prefers-reduced-motion`.
 
-En `/admin` → **Contenido del sitio** se configuran Facebook, Instagram, TikTok y número de WhatsApp (con prefijo). Solo se admiten enlaces HTTPS de los dominios oficiales; los enlaces vacíos aparecen como pendientes, **sin inventar perfiles ni números**. Se editarán asimismo tres imágenes del hero mediante URL o Storage.
+En `/admin` → **Contenido del sitio** se configuran Facebook, Instagram, TikTok y número de WhatsApp (con prefijo). Solo se admiten enlaces HTTPS de los dominios oficiales; los enlaces vacíos aparecen como pendientes, **sin inventar perfiles ni números**. El número oficial de WhatsApp predeterminado es `+505 5725 1888` y puede modificarse desde el administrador. Se editarán asimismo tres imágenes del hero mediante URL o Storage.
 
 **Despliegue único**: conservar el proyecto existente `isabelvalenzuela` en Vercel con repositorio `moneyfund/ISABEL-VALENZUELA`, rama de producción `main`. La tarjeta «New repository detected» de Vercel es un aviso de importación, no un segundo despliegue. No importarlo otra vez. Al integrar cambios en `main`, el proyecto vinculado puede generar despliegues automáticamente.
+
+## Acceso administrativo autorizado (13 nov 2026)
+El panel /admin comprueba que la sesión sea Google y que su correo esté verificado y pertenezca a una lista exacta: `norvingarcia220@gmail.com` y `valenzuela.ing120@gmail.com`.
+Las reglas de `firestore.rules` y `storage.rules` replican la misma restricción en Firebase, con acceso público únicamente a anuncios `published == true` y al documento `site/public`. Las imágenes publicitarias de Storage son de lectura pública.
+**IMPORTANTE:** la seguridad efectiva depende de publicar ambas reglas en Firebase Console; cambiar archivos en GitHub no actualiza automáticamente las reglas del servidor Firebase.
+El teléfono WhatsApp predeterminado es `+505 5725 1888` (`50557251888`), vinculado en todas las vistas públicas. Un documento antiguo con WhatsApp vacío utiliza el valor predeterminado.
