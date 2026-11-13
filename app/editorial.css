@@ -215,3 +215,15 @@ h1,h2,h3 { letter-spacing:-.035em; }
   .iv-hero__content,.iv-estate { animation:none; }
   .iv-estate__image-wrap img,.iv-estate { transition:none; }
 }
+
+/* An architectural texture remains optional and admin-editable.
+   Its low opacity keeps the petrol field consistent without visual noise. */
+.iv-hero__background img {
+  position:absolute; inset:0 auto 0 0; width:65%; height:100%; object-fit:cover;
+  filter:grayscale(1) contrast(1.15); opacity:.075; mix-blend-mode:screen;
+}
+.iv-introduction h2 { max-width:670px; text-wrap:balance; }
+@media(max-width:680px) {
+  .iv-hero__background img { width:100%; opacity:.055; }
+  .iv-introduction h2 { font-size:clamp(36px,9vw,47px); }
+}
