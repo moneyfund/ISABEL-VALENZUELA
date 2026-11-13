@@ -53,7 +53,7 @@ export const defaultSite: SiteContent = {
   introDescription: "Explora espacios con potencial y encuentra asesoría personal durante cada etapa de tu decisión inmobiliaria.",
   aboutTitle: "Soy Isabel Valenzuela. Tu siguiente paso comienza con confianza.",
   aboutDescription: "Te acompaño a explorar oportunidades inmobiliarias en Nicaragua con una atención cercana, transparente y enfocada en tus objetivos. Cada decisión merece tiempo, información clara y un trato verdaderamente personal.",
-  aboutImage: "/isabel-valenzuela.webp",
+  aboutImage: "https://d2ol7oe51mr4n9.cloudfront.net/user_3KniZP3dkw5KyzASdx6oDnrJPeH/232c4026-f827-4bf9-9516-e730cd0b2727.jpg",
   serviceArea: "Nicaragua",
   whatsapp: "50557251888",
   email: "",
@@ -70,6 +70,11 @@ export function normalizeSiteContent(source: Partial<SiteContent> | null | undef
   const site = { ...defaultSite, ...(source || {}) };
   return {
     ...site,
+    // Upgrade the low-resolution portrait reference in existing site/public records,
+    // without changing any custom photograph Isabel may have selected.
+    aboutImage: !site.aboutImage || site.aboutImage === "/isabel-valenzuela.webp"
+      ? defaultSite.aboutImage
+      : site.aboutImage,
     whatsapp: typeof site.whatsapp === "string" && site.whatsapp.trim()
       ? site.whatsapp.trim()
       : defaultSite.whatsapp
