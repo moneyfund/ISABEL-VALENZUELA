@@ -38,3 +38,17 @@ npm run dev
 npm run typecheck
 npm run build
 ```
+
+## Firebase de Isabel (12 nov 2026)
+La configuración del cliente Firebase Web SDK ya está incorporada como valores de reserva en `lib/firebase.ts` para `isabelvalenzuela-52364`. Los valores públicos `NEXT_PUBLIC_*` definidos en Vercel tienen prioridad; nunca incorpores contraseñas, llaves de service account ni tokens de administrador al código.
+
+La foto compartida por Isabel está integrada como `public/isabel-valenzuela.webp` (versión web optimizada) y se usa en «Sobre Isabel». Puede reemplazarse desde el editor de contenidos con una imagen de Firebase Storage.
+
+**Antes de activar el panel:**
+1. Habilitar Google Sign-In en Firebase Authentication.
+2. Agregar el dominio desplegado a Authentication → Settings → Authorized domains.
+3. Crear Firestore y Cloud Storage y aplicar `firestore.rules` y `storage.rules`. Tener un proyecto Firebase y la configuración del SDK no crea por sí solo los servicios ni instala las reglas.
+4. Aprovisionar manualmente cada administrador por UID en la colección `admins`.
+5. Publicar las propiedades reales. Hasta entonces se muestran fichas **DEMO** sin grabarlas en Firestore.
+
+**Despliegue Vercel:** el código funciona con la configuración pública de Firebase que ya se incluye. No se requieren variables de entorno para este proyecto concreto, aunque se recomienda configurarlas desde Vercel para mantener todos los entornos explícitos. No se debe afirmar que el panel está operativo hasta activar los servicios de Firebase y aplicar las reglas.

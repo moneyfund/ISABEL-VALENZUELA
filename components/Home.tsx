@@ -8,7 +8,6 @@ import Reveal from "./Reveal";
 import Footer from "./Footer";
 import { subscribeProperties, subscribeSite } from "@/lib/repository";
 import { defaultSite, type Property, type SiteContent } from "@/lib/models";
-import { firebaseReady } from "@/lib/firebase";
 import { validImage } from "@/lib/format";
 
 export default function Home() {
@@ -73,7 +72,7 @@ export default function Home() {
           <div><p className="eyebrow eyebrow--dark"><span className="dot" /> COLECCIÓN INMOBILIARIA</p><h2>Espacios para <em>imaginar más.</em></h2></div>
           <p>Encuentra oportunidades que conectan con tus planes y tu estilo de vida.</p>
         </Reveal>
-        {!firebaseReady && <p className="demo-notice"><Sparkles size={17} /> Vista de demostración: las propiedades, precios e imágenes siguientes son ilustrativos y no constituyen ofertas reales.</p>}
+        {properties.some(p => p.demo) && <p className="demo-notice"><Sparkles size={17} /> Vista de demostración: las propiedades, precios e imágenes siguientes son ilustrativos y no constituyen ofertas reales.</p>}
         {error && <p className="status-error" role="alert">{error}</p>}
         <div className="properties-grid">
           {filtered.slice(0, visibleCount).map((property, i) => <PropertyCard property={property} index={i} key={property.id} />)}
@@ -89,7 +88,7 @@ export default function Home() {
 
     <section id="nosotros" className="about section-space">
       <div className="container about__grid">
-        <Reveal className="about__visual"><img src={validImage(site.aboutImage) ? site.aboutImage : defaultSite.aboutImage} loading="lazy" alt="Arquitectura e inspiración inmobiliaria" /><span className="about__image-caption">UNA MIRADA DIFERENTE SOBRE LOS ESPACIOS</span></Reveal>
+        <Reveal className="about__visual"><img src={validImage(site.aboutImage) ? site.aboutImage : defaultSite.aboutImage} loading="lazy" alt="Retrato de Isabel Valenzuela" /><span className="about__image-caption">UNA MIRADA DIFERENTE SOBRE LOS ESPACIOS</span></Reveal>
         <Reveal className="about__content" delay={150}>
           <p className="eyebrow eyebrow--dark"><span className="dot" /> CONOCE A ISABEL</p>
           <h2>{site.aboutTitle}</h2>

@@ -12,9 +12,14 @@ export function subscribeProperties(
   }
   return onSnapshot(
     query(collection(db, "properties"), where("published", "==", true)),
-    snapshot => next(snapshot.docs.map(item => ({ ...item.data(), id: item.id } as Property))
-      .sort((a, b) => b.createdAt - a.createdAt)),
-    error => fail(error)
+    snapshot => {
+      const items = snapshot.docs.map(item => ({ ...item.data(), id: item.id } as Property))
+        .sort((a, b) => b.createdAt - a.createdAt);
+      // Demo fichas remain visible until an actual listing is published.
+      // No fictitious item is written to Firestore.
+      next(items.length ? items : demoProperties);
+    },
+    error => { next(demoProperties); fail(error); }
   );
 }
 
@@ -30,7 +35,8 @@ export function subscribeSite(next: (content: SiteContent) => void, fail: (error
 }
 
 export async function getProperty(id: string): Promise<Property | null> {
-  if (!firebaseReady || !db) return demoProperties.find(p => p.id === id) || null;
+  if (id.startsWith("demo-")) return demoProperties.find(p => p.id === id) || null;
+  if (!firebaseReady || !db) return null;
   const snapshot = await getDoc(doc(db, "properties", id));
   const data = snapshot.exists() ? ({ ...snapshot.data(), id: snapshot.id } as Property) : null;
   return data?.published ? data : null;
