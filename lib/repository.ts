@@ -1,7 +1,7 @@
 import { collection, doc, getDoc, onSnapshot, query, where } from "firebase/firestore";
 import { db, firebaseReady } from "./firebase";
 import { demoProperties } from "./demo";
-import { defaultSite, type Property, type SiteContent } from "./models";
+import { defaultSite, normalizeSiteContent, type Property, type SiteContent } from "./models";
 
 export function subscribeProperties(
   next: (items: Property[]) => void, fail: (error: Error) => void
@@ -29,7 +29,7 @@ export function subscribeSite(next: (content: SiteContent) => void, fail: (error
     return () => {};
   }
   return onSnapshot(doc(db, "site", "public"),
-    snapshot => next({ ...defaultSite, ...(snapshot.exists() ? snapshot.data() : {}) }),
+    snapshot => next(normalizeSiteContent(snapshot.exists() ? snapshot.data() : null)),
     error => fail(error)
   );
 }
