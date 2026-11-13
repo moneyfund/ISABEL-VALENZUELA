@@ -36,6 +36,8 @@ export interface SiteContent {
   whatsapp: string;
   email: string;
   instagram: string;
+  facebook: string;
+  tiktok: string;
 }
 
 export const defaultSite: SiteContent = {
@@ -51,5 +53,7 @@ export const defaultSite: SiteContent = {
   serviceArea: "Nicaragua",
   whatsapp: "",
   email: "",
-  instagram: ""
+  instagram: "",
+  facebook: "",
+  tiktok: ""
 };
