@@ -10,6 +10,8 @@ import PropertyCard from "./PropertyCard";
 import SocialLinks from "./SocialLinks";
 import { usePublicProperties, useSiteContent } from "@/lib/usePublic";
 import { whatsappUrl } from "@/lib/social";
+import { defaultSite } from "@/lib/models";
+import { validImage } from "@/lib/format";
 
 const oldHeadlines = new Set([
   "Espacios que inspiran. Decisiones que trascienden.",
@@ -27,6 +29,12 @@ export default function Home() {
   const title = !site.heroTitle?.trim() || oldHeadlines.has(site.heroTitle.trim())
     ? "Encontrá tu lugar." : site.heroTitle;
   const whatsapp = whatsappUrl(site.whatsapp);
+  const subtitle = site.heroSubtitle && site.heroSubtitle !== "Acompañamiento inmobiliario cercano, criterio profesional y una selección pensada para tu próxima etapa."
+    ? site.heroSubtitle : "Compra, venta e inversión inmobiliaria en Nicaragua.";
+  const introTitle = site.introTitle === "Cada propiedad es el comienzo de una historia."
+    ? "Un trato cercano. Una decisión importante." : site.introTitle;
+  const introDescription = site.introDescription === "Explora espacios con potencial y encuentra asesoría personal durante cada etapa de tu decisión inmobiliaria."
+    ? "Te acompaño a encontrar, comprar o vender tu propiedad con claridad y atención personal." : site.introDescription;
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -38,7 +46,9 @@ export default function Home() {
     <Navigation />
 
     <section className="iv-hero" aria-labelledby="iv-hero-title">
-      <div className="iv-hero__background" aria-hidden="true" />
+      <div className="iv-hero__background" aria-hidden="true">
+        <img src={validImage(site.heroImage) ? site.heroImage : defaultSite.heroImage} alt="" />
+      </div>
       <div className="iv-hero__portrait-wrap">
         <img src="/isabel-valenzuela.webp" alt="Isabel Valenzuela, agente inmobiliaria" className="iv-hero__portrait" fetchPriority="high" />
         <span className="iv-hero__portrait-label">Isabel Valenzuela</span>
@@ -47,7 +57,7 @@ export default function Home() {
         <div className="iv-hero__content">
           <p className="iv-hero__kicker"><span /> ISABEL VALENZUELA | BIENES RAÍCES</p>
           <h1 id="iv-hero-title">{title}</h1>
-          <p className="iv-hero__subtitle">Compra, venta e inversión inmobiliaria en Nicaragua.</p>
+          <p className="iv-hero__subtitle">{subtitle}</p>
           <div className="iv-hero__actions">
             <Link href="/propiedades" className="iv-hero__primary">Ver propiedades <ArrowUpRight size={18}/></Link>
             {whatsapp && <a className="iv-hero__whatsapp" href={whatsapp} target="_blank" rel="noopener noreferrer"><MessageCircle size={19}/> WhatsApp</a>}
@@ -82,10 +92,10 @@ export default function Home() {
       <div className="container iv-introduction__inner">
         <div>
           <p className="iv-eyebrow">SOBRE ISABEL</p>
-          <h2>Un trato cercano.<br/>Una decisión importante.</h2>
+          <h2>{introTitle}</h2>
         </div>
         <div className="iv-introduction__right">
-          <p>Te acompaño a encontrar, comprar o vender tu propiedad con claridad y atención personal.</p>
+          <p>{introDescription}</p>
           <Link href="/sobre-isabel" className="iv-simple-link iv-simple-link--light">Conocé mi trabajo <ArrowUpRight size={18}/></Link>
         </div>
       </div>
