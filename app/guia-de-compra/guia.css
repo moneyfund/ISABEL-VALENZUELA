@@ -175,3 +175,20 @@
   .purchase-alerts { page-break-inside:avoid; }
 }
 @media(prefers-reduced-motion:reduce) { .purchase-choice,.purchase-progressbar > span { transition:none; } }
+
+/* Lead identification and explicit authorization are part of the purchase guide. */
+.purchase-name-row { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px; }
+.purchase-name-row label { display:flex;flex-direction:column;gap:9px;color:#566c62;font-size:11px; }
+.purchase-name-row label span b { color:#a46736; }
+.purchase-name-row input { border:1px solid #dfe5de;background:#fbfbf9;width:100%;min-height:51px;padding:13px 15px;outline-color:#b99561;color:#17393e;font-size:13px; }
+.purchase-consent { display:flex;align-items:flex-start;gap:12px;background:#f3f6f1;border:1px solid #dde8dc;padding:18px;color:#4e665c;font-size:11px;line-height:1.85;cursor:pointer; }
+.purchase-consent input { flex-shrink:0;margin-top:4px;width:17px;height:17px;accent-color:#0b3037;cursor:pointer; }
+.purchase-submit-error { border-left:3px solid #b85144;background:#fff0ec;color:#9b453b;padding:14px 19px;margin:0 48px 20px;font-size:12px;line-height:1.8; }
+.purchase-reference { margin-top:22px;border:1px solid rgba(216,188,121,.56);padding:16px 18px;display:flex;align-items:center;flex-wrap:wrap;gap:7px;color:#ebddbb;font-size:12px;line-height:1.8;background:rgba(255,255,255,.06); }
+.purchase-reference svg { color:#b4d3bd;flex-shrink:0; }
+.purchase-reference strong { color:#fff;letter-spacing:.07em;white-space:nowrap; }
+@media(max-width:650px) {
+  .purchase-name-row { grid-template-columns:1fr; }
+  .purchase-submit-error { margin:0 24px 16px; }
+  .purchase-reference { padding:13px;font-size:11px; }
+}
