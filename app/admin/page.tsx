@@ -15,9 +15,11 @@ import { cleanPropertyId, money, validImage } from "@/lib/format";
 import { contactEmail, safeSocialUrl, whatsappUrl } from "@/lib/social";
 import SocialLinks from "@/components/SocialLinks";
 import { isAllowedAdminEmail } from "@/lib/admin-access";
+import GuideRequestsPanel from "@/components/admin/GuideRequestsPanel";
+import "./admin-requests.css";
 
 type Gate = "checking" | "setup" | "guest" | "denied" | "admin";
-type Tab = "overview" | "properties" | "content";
+type Tab = "overview" | "properties" | "content" | "requests";
 
 const emptyProperty = (): Property => ({
   id: "", title: "", category: "Casa", operation: "Venta", city: "",
@@ -223,11 +225,12 @@ export default function AdminPage() {
       <button className={tab === "overview" ? "selected" : ""} onClick={() => {setTab("overview"); setEditing(false);}}><LayoutDashboard size={18}/> Resumen</button>
       <button className={tab === "properties" ? "selected" : ""} onClick={() => {setTab("properties"); setEditing(false);}}><Building2 size={18}/> Propiedades</button>
       <button className={tab === "content" ? "selected" : ""} onClick={() => {setTab("content"); setEditing(false);}}><FilePenLine size={18}/> Contenido web</button>
+      <button className={tab === "requests" ? "selected" : ""} onClick={() => {setTab("requests"); setEditing(false);}}><FilePenLine size={18}/> Guías recibidas</button>
       <div className="admin__sidebar-bottom"><Link href="/" target="_blank"><Globe2 size={18}/> Ver sitio público <ArrowUpRight size={15}/></Link><button onClick={() => auth && signOut(auth)}><LogOut size={18}/> Cerrar sesión</button></div>
     </aside>
     <div className="admin__workspace">
-      <header className="admin__top"><div><span className="admin__mobile-label">ISABEL VALENZUELA · PANEL</span><p>GESTIÓN INMOBILIARIA</p><h1>{tab === "overview" ? "Panel general" : tab === "properties" ? "Propiedades" : "Contenido del sitio"}</h1></div><div className="admin__user"><span>{user?.displayName || user?.email}</span>{user?.photoURL ? <img src={user.photoURL} width={36} height={36} alt="" /> : <span className="admin__avatar">IV</span>}</div></header>
-      <nav className="admin__mobile-nav" aria-label="Opciones del panel"><button onClick={() => {setTab("overview"); setEditing(false);}}>Resumen</button><button onClick={() => {setTab("properties"); setEditing(false);}}>Propiedades</button><button onClick={() => {setTab("content"); setEditing(false);}}>Contenido</button><button onClick={() => auth && signOut(auth)}>Salir</button></nav>
+      <header className="admin__top"><div><span className="admin__mobile-label">ISABEL VALENZUELA · PANEL</span><p>GESTIÓN INMOBILIARIA</p><h1>{tab === "overview" ? "Panel general" : tab === "properties" ? "Propiedades" : tab === "requests" ? "Guías recibidas" : "Contenido del sitio"}</h1></div><div className="admin__user"><span>{user?.displayName || user?.email}</span>{user?.photoURL ? <img src={user.photoURL} width={36} height={36} alt="" /> : <span className="admin__avatar">IV</span>}</div></header>
+      <nav className="admin__mobile-nav" aria-label="Opciones del panel"><button onClick={() => {setTab("overview"); setEditing(false);}}>Resumen</button><button onClick={() => {setTab("properties"); setEditing(false);}}>Propiedades</button><button onClick={() => {setTab("content"); setEditing(false);}}>Contenido</button><button onClick={() => {setTab("requests"); setEditing(false);}}>Consultas</button><button onClick={() => auth && signOut(auth)}>Salir</button></nav>
       {error && <div className="admin-message admin-message--error" role="alert">{error} <button onClick={() => setError("")}><X size={15}/></button></div>}
       {notice && <div className="admin-message admin-message--success" role="status"><CheckCircle2 size={17}/>{notice}<button onClick={() => setNotice("")}><X size={15}/></button></div>}
 
@@ -236,6 +239,8 @@ export default function AdminPage() {
         <div className="admin-stats"><div><span>PROPIEDADES TOTALES</span><strong>{stats.total}</strong><Building2 size={23}/></div><div><span>PUBLICADAS</span><strong>{stats.published}</strong><CheckCircle2 size={23}/></div><div><span>DESTACADAS</span><strong>{stats.featured}</strong><ImagePlus size={23}/></div></div>
         <div className="admin-panel"><div className="admin-panel__title"><h3>Publicaciones recientes</h3><button className="text-link" onClick={() => setTab("properties")}>Administrar todo <ArrowUpRight size={17}/></button></div>{properties.length ? <div className="admin-list">{properties.slice(0, 5).map(property => <div className="admin-list__row" key={property.id}><img src={property.images?.[0] || "/property-fallback.svg"} width={76} height={57} alt="" /><div><strong>{property.title}</strong><small>{property.location}</small></div><span className={property.published ? "admin-tag admin-tag--on" : "admin-tag"}>{property.published ? "Publicada" : "Borrador"}</span><button onClick={() => startEdit(property)} aria-label="Editar propiedad"><FilePenLine size={18}/></button></div>)}</div> : <p className="admin-empty">No hay propiedades en Firestore todavía. Crea la primera publicación.</p>}</div>
       </div>}
+
+      {tab === "requests" && <GuideRequestsPanel />}
 
       {tab === "properties" && <div className="admin__content">
         {!editing ? <>
