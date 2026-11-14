@@ -82,3 +82,17 @@ En el formulario administrativo puede hacerse clic sobre el mapa para colocar un
 Usar el proyecto Vercel existente **`isabelvalenzuela`**, vinculado a `moneyfund/ISABEL-VALENZUELA` en la rama `main`. No importar una segunda copia del repositorio.
 
 Los cambios fusionados a `main` pueden generar un despliegue automático. Verificar el estado de compilación y publicación en Vercel.
+
+## Contador de solicitudes nuevas en administración
+
+El botón **Guías recibidas** del menú administrativo muestra una campana y el
+número de solicitudes con `status == "nuevo"` (escritas por las cuatro guías).
+Se actualiza en tiempo real mediante una suscripción Firestore independiente del
+panel de consultas, tanto en escritorio como en dispositivos móviles. Al pasar
+una solicitud a **Contactado** o **Atendido**, o al eliminarla, el contador baja;
+si ya no hay nuevas, la insignia desaparece.
+
+La escucha solo se activa después de validar la sesión Google del administrador
+contra la lista de correos permitidos. Se desconecta al cerrar sesión. No es
+una notificación push del navegador: el contador se muestra mientras el panel
+administrativo está abierto. No requiere cambios en reglas de Firestore o Storage.

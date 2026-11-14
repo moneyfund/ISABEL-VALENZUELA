@@ -62,3 +62,36 @@
   .guide-inbox__toolbar{display:grid;grid-template-columns:1fr;gap:10px;}
   .guide-inbox__toolbar label,.guide-inbox__toolbar>select{width:100%;max-width:none;min-width:0;}
 }
+
+/* Live notifications in the admin navigation. The number comes from Firestore. */
+.admin-guides-badge {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 36px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #d8b477;
+  color: #10343a;
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 0 0 1px rgba(216, 180, 119, .18);
+}
+.admin-guides-badge svg { flex-shrink: 0; }
+.admin__sidebar > button.selected .admin-guides-badge { background: #efd5a3; }
+.admin__mobile-nav button:has(.admin-guides-badge) {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.admin-guides-badge--mobile {
+  margin-left: 0;
+  min-width: 30px;
+  padding: 4px 7px;
+  font-size: 10px;
+}
