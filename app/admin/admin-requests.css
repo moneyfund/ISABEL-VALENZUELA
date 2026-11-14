@@ -48,3 +48,8 @@
 .guide-inbox__detail-actions button { margin-left:0; }
 .guide-inbox__count { margin-top:17px;width:max-content; }
 }
+
+
+.guide-inbox__phone,.guide-inbox__phone-link { display:inline-flex;align-items:center;gap:7px;color:#245f56;text-decoration:underline;text-decoration-color:#a7bdb2;text-underline-offset:3px;font-size:12px; }
+.guide-inbox__phone { margin-top:7px; }
+.guide-inbox__phone:hover,.guide-inbox__phone-link:hover { color:#a47d41; }
