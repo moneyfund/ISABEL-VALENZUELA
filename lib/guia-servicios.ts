@@ -90,7 +90,7 @@ export function serviceAnswerValid(kind:ServiceGuideType,values:ServiceAnswers):
     const value=(values[field.key]||"").trim();
     if(!value) return !!field.optional;
     if(field.input==="choice") return !!field.options?.some(option=>option.value===value);
-    if(field.input==="text") return value.length>=2 && value.length<=120 && !/[<>\\\n\r]/.test(value);
+    if(field.input==="text") return value.length>=2 && value.length<=120 && [...value].every(c => c.charCodeAt(0)>=32 && c!=="<" && c!==">");
     if(field.input==="money" || field.input==="number") {
       const n=Number(value);
       return Number.isFinite(n) && n>0 && n<=100000000;
