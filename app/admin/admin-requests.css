@@ -53,3 +53,12 @@
 .guide-inbox__phone,.guide-inbox__phone-link { display:inline-flex;align-items:center;gap:7px;color:#245f56;text-decoration:underline;text-decoration-color:#a7bdb2;text-underline-offset:3px;font-size:12px; }
 .guide-inbox__phone { margin-top:7px; }
 .guide-inbox__phone:hover,.guide-inbox__phone-link:hover { color:#a47d41; }
+
+/* New guide classifications and compact combined inbox filters. */
+.guide-inbox__category{display:inline-flex;align-items:center;margin:0 0 0 9px;background:#ecf3ef;color:#2b6855;border:1px solid #d9e7dc;padding:5px 8px;font-size:10px;font-weight:700;letter-spacing:.03em;}
+.guide-inbox__toolbar>select{max-width:220px;min-width:160px;}
+.guide-inbox__summary small{line-height:1.7;overflow-wrap:anywhere;}
+@media(max-width:670px){
+  .guide-inbox__toolbar{display:grid;grid-template-columns:1fr;gap:10px;}
+  .guide-inbox__toolbar label,.guide-inbox__toolbar>select{width:100%;max-width:none;min-width:0;}
+}
