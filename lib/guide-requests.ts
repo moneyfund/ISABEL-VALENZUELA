@@ -9,6 +9,7 @@ export interface GuideRequestRecord {
   id: string;
   firstName: string;
   lastName: string;
+  phone?: string;
   payment: PaymentMode;
   property: PropertyType;
   income: IncomeType;
@@ -20,6 +21,19 @@ export interface GuideRequestRecord {
   consent: true;
   status: GuideRequestStatus;
   createdAt?: Timestamp;
+}
+
+/**
+ * E.164 phone for follow-up. Nicaraguan local 8-digit numbers default to +505.
+ * No telephone authentication or ownership confirmation is implied.
+ */
+export function normalizeGuidePhone(input: string): string | null {
+  const value = input.trim();
+  if (!/^[+\d\s().-]+$/.test(value)) return null;
+  const number = value.replace(/[^\d]/g, "");
+  const full = number.length === 8 ? "505" + number : number.startsWith("00") ? number.slice(2) : number;
+  if (!/^[1-9]\d{7,14}$/.test(full)) return null;
+  return "+" + full;
 }
 
 export function guideReference(id: string) {
@@ -39,6 +53,7 @@ export async function submitGuideRequest(
   firestore: Firestore,
   firstName: string,
   lastName: string,
+  phone: string,
   answers: GuideAnswers,
   consent: boolean
 ): Promise<string> {
@@ -46,6 +61,10 @@ export async function submitGuideRequest(
   const surname = lastName.trim().replace(/\s+/g, " ");
   if (name.length < 2 || surname.length < 2 || name.length > 60 || surname.length > 60) {
     throw new Error("Escribí tu nombre y apellido (de 2 a 60 caracteres cada uno).");
+  }
+  const formattedPhone = normalizeGuidePhone(phone);
+  if (!formattedPhone) {
+    throw new Error("Ingresá un celular válido con código de país. Para Nicaragua podés escribir 8 dígitos.");
   }
   if (!answers.payment || !answers.property || !answers.income ||
       !answers.residence || !answers.documents || answers.identified === null) {
@@ -60,6 +79,7 @@ export async function submitGuideRequest(
   await setDoc(reference, {
     firstName: name,
     lastName: surname,
+    phone: formattedPhone,
     payment: answers.payment,
     property: answers.property,
     income: answers.income,
