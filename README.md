@@ -73,3 +73,37 @@ El panel /admin comprueba que la sesión sea Google y que su correo esté verifi
 Las reglas de `firestore.rules` y `storage.rules` replican la misma restricción en Firebase, con acceso público únicamente a anuncios `published == true` y al documento `site/public`. Las imágenes publicitarias de Storage son de lectura pública.
 **IMPORTANTE:** la seguridad efectiva depende de publicar ambas reglas en Firebase Console; cambiar archivos en GitHub no actualiza automáticamente las reglas del servidor Firebase.
 El teléfono WhatsApp predeterminado es `+505 5725 1888` (`50557251888`), vinculado en todas las vistas públicas. Un documento antiguo con WhatsApp vacío utiliza el valor predeterminado.
+
+
+## Guía de compra como captación de consultas (noviembre 2026)
+La ruta pública `/guia-de-compra` solicita **nombre y apellido en la primera pantalla**.
+El visitante responde la modalidad de pago, tipo de propiedad, estado de inscripción,
+si ya tiene un inmueble identificado, origen de los ingresos, residencia y presupuesto
+opcional. Antes de obtener la guía, debe aceptar expresamente el almacenamiento de
+esos datos para atención comercial y pulsar **Enviar guía**.
+
+Solo tras confirmarse la escritura en Firestore se muestra la guía personalizada,
+junto con una referencia `IV-XXXXXXXX`. El botón WhatsApp precarga nombre y referencia,
+no vuelca a WhatsApp los datos financieros: el equipo los consulta en `/admin`.
+
+Colección Firestore: `purchase_requests`. Campos:
+`firstName`, `lastName`, `payment`, `property`, `income`, `residence`,
+`documents`, `identified`, `price`, `savings`, `consent`,
+`status` (nuevo, contactado, atendido) y `createdAt` (timestamp del servidor).
+
+`/admin` → **Guías recibidas** muestra las 150 consultas recientes, con búsqueda
+por nombre o código, fecha/hora en zona `America/Managua`, todas las respuestas,
+gestión de estado y borrado definitivo autorizado.
+
+**Paso manual obligatorio:** publicar la versión íntegra de `firestore.rules` en
+Firebase Console. Sin esa actualización, el sistema público no podrá enviar solicitudes
+y el panel no podrá leerlas; la UI mostrará un error en vez de confirmar un envío no
+guardado. Storage no necesita cambios para esta funcionalidad.
+
+**Privacidad y seguridad:** las respuestas no se publican ni se consultan sin iniciar
+sesión con uno de los dos correos administrativos verificados. Las reglas permiten
+crear solicitudes únicamente con campos y valores validados, pero un formulario
+público podría recibir spam. Antes de campañas de alto tráfico, habilitar Firebase App
+Check o un endpoint protegido con verificación antispam, y definir una política de
+retención/eliminación de solicitudes. No se solicitan cédulas, contraseñas ni cuentas
+bancarias. No se almacena automáticamente el número del remitente de WhatsApp.
