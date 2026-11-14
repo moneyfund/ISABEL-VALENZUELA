@@ -2,10 +2,7 @@ import { collection, doc, getDoc, onSnapshot, query, where } from "firebase/fire
 import { db, firebaseReady } from "./firebase";
 import { type Property, type SiteContent, defaultSite, normalizeSiteContent } from "./models";
 
-/**
- * The public catalog only includes actual published Firestore listings.
- * Sample listings remain editable/removable under Admin > Properties > DEMO.
- */
+/** The public catalog contains only real, published Firestore listings. */
 export function subscribeProperties(
   next: (items: Property[]) => void, fail: (error: Error) => void
 ): () => void {
@@ -17,8 +14,9 @@ export function subscribeProperties(
     query(collection(db, "properties"), where("published", "==", true)),
     snapshot => {
       const listings = snapshot.docs
-        .map(item => ({ ...item.data(), id: item.id } as Property))
-        .filter(item => !item.demo)
+        // Protect against old sample documents accidentally stored in Firestore.
+        .filter(entry => !entry.id.startsWith("demo-") && entry.data().demo !== true)
+        .map(entry => ({ ...entry.data(), id: entry.id } as Property))
         .sort((a, b) => b.createdAt - a.createdAt);
       next(listings);
     },
@@ -38,9 +36,10 @@ export function subscribeSite(next: (content: SiteContent) => void, fail: (error
 }
 
 export async function getProperty(id: string): Promise<Property | null> {
-  // Do not expose fictitious property cards (even via direct /propiedades/demo-* URLs).
+  // Never expose legacy sample identifiers, including through direct URLs.
   if (id.startsWith("demo-") || !firebaseReady || !db) return null;
   const snapshot = await getDoc(doc(db, "properties", id));
-  const data = snapshot.exists() ? ({ ...snapshot.data(), id: snapshot.id } as Property) : null;
-  return data?.published && !data.demo ? data : null;
+  if (!snapshot.exists() || snapshot.data().demo === true) return null;
+  const data = { ...snapshot.data(), id: snapshot.id } as Property;
+  return data.published ? data : null;
 }

@@ -21,16 +21,3 @@
   .admin-category-panel__tag {display:inline-block;margin-top:14px;}
   .admin-category-panel__options {grid-template-columns:1fr;}
 }
-
-.demo-manager__description { max-width:670px;color:#73827b;font-size:12px;line-height:1.8;margin:8px 0 0; }
-.demo-manager__counter { display:inline-flex;align-items:center;justify-content:center;padding:9px 13px;background:#f5efe2;color:#917343;font-weight:700;font-size:11px;white-space:nowrap; }
-.demo-manager__demo-tag { color:#a57a31!important;background:#fcf1d8!important; }
-.demo-manager__remove { display:inline-flex;align-items:center;gap:7px;white-space:nowrap;padding:10px 12px;color:#b4564c;background:#fff;border:1px solid #edcbc6;cursor:pointer;font-size:11px;font-weight:600; }
-.demo-manager__remove:hover:not(:disabled) {background:#fff0ec;border-color:#d6a9a0;}
-.demo-manager__remove:disabled,.demo-manager__hidden button:disabled {opacity:.45;cursor:not-allowed;}
-.demo-manager__hidden { border-top:1px solid #e5ebe5;margin-top:23px;padding-top:22px;display:grid;gap:10px; }
-.demo-manager__hidden > strong {font-size:12px;color:#536a5b;margin-bottom:5px;}
-.demo-manager__hidden > div {display:flex;align-items:center;justify-content:space-between;gap:15px;padding:10px 0;border-bottom:1px solid #edf0e9;}
-.demo-manager__hidden > div > span {font-size:11px;color:#76867d;}
-.demo-manager__hidden button {border:1px solid #d5c1a2;background:#fff;color:#8b6c3b;padding:7px 12px;font-size:11px;cursor:pointer;}
-@media(max-width:680px) {.demo-manager__remove {padding:8px 10px;}.demo-manager__hidden > div {align-items:flex-start;}}
