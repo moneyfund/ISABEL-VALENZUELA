@@ -132,3 +132,39 @@ bancarias. No se almacena automáticamente el número del remitente de WhatsApp.
 Las pruebas de interfaz necesitan Firebase Authentication, Firestore y reglas publicadas
 antes de efectuar una solicitud real de prueba. Las verificaciones CI no sustituyen ese
 paso ni realizan un envío de datos de un usuario.
+
+
+## Ubicación geográfica de los inmuebles (noviembre 2026)
+
+La pantalla `/admin` → **Propiedades** → nueva/editar contiene ahora **Ubicación en el mapa**.
+El selector usa Leaflet 1.9.4 y las teselas de OpenStreetMap (attribution visible), con
+interacción por clic, zoom y desplazamiento. También permite pegar manualmente
+latitud y longitud y pulsar `Usar coordenadas`. No utiliza la ubicación del
+dispositivo ni rellena un punto ficticio.
+
+El documento `properties/{propertyId}` admite el campo opcional:
+```json
+"coordinates": { "lat": 12.925, "lng": -85.916 }
+```
+Los valores son números en grados decimales, con rangos validados en la interfaz
+(latitud de -90 a 90 y longitud de -180 a 180). Si el agente no indica ubicación,
+se guarda `null`. No se necesita migrar inmuebles existentes ni modificar reglas
+de Firestore/Storage. Las fichas públicas con coordenadas válidas muestran el
+**mismo punto** en el mapa y un enlace a OpenStreetMap para abrirlo.
+
+La ubicación seleccionada **se hace pública** cuando se publica el anuncio:
+recomendar a la agente elegir un punto aproximado si no desea difundir la
+dirección exacta de una residencia particular.
+
+**Estado de los ejemplos:** las 6 propiedades `demo-*` son únicamente datos
+de diseño y no representan ofertas inmobiliarias. Ya no aparecen en la web pública,
+ni siquiera cuando Firestore no contiene inmuebles reales, y sus rutas directas
+retornan el estado "Esta propiedad no está disponible". Se eliminaron de Inicio,
+Catálogo y Detalle los avisos visuales grandes de demostración, porque las fichas
+ficticias no se exponen. Isabel puede retirarlas/archivarlas desde la lista de
+ejemplos internos del administrador. Los anuncios reales publicados sí aparecen
+inmediatamente.
+
+Los mapas cargan de forma diferida la versión fijada de Leaflet mediante CDN.
+Requieren conexión a Internet tanto para la biblioteca como para las teselas.
+Si el mapa no carga, el administrador mantiene los campos manuales de coordenadas.
