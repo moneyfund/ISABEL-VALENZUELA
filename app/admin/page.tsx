@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { getIdTokenResult, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, type User } from "firebase/auth";
-import { collection, deleteDoc, doc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
+import { arrayRemove, arrayUnion, collection, deleteDoc, doc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import {
   ArrowLeft, ArrowUpRight, Building2, CheckCircle2, CloudUpload, FilePenLine,
@@ -12,6 +12,7 @@ import {
 import { auth, db, firebaseReady, storage } from "@/lib/firebase";
 import { defaultSite, normalizeSiteContent, type Property, type PropertyCategory, type SiteContent, type Operation } from "@/lib/models";
 import { cleanPropertyId, money, validImage } from "@/lib/format";
+import { demoProperties } from "@/lib/demo";
 import { contactEmail, safeSocialUrl, whatsappUrl } from "@/lib/social";
 import SocialLinks from "@/components/SocialLinks";
 import { isAllowedAdminEmail } from "@/lib/admin-access";
@@ -41,6 +42,7 @@ export default function AdminPage() {
   const [editing, setEditing] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
+  const [demoSaving, setDemoSaving] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
 
@@ -81,6 +83,28 @@ export default function AdminPage() {
     });
     return () => { active = false; stopAuth(); unsubProperties?.(); unsubSite?.(); };
   }, []);
+
+
+  const visibleDemos = demoProperties.filter(property => !site.hiddenDemoIds.includes(property.id));
+  const hiddenDemos = demoProperties.filter(property => site.hiddenDemoIds.includes(property.id));
+
+  async function updateDemoVisibility(id: string, hide: boolean) {
+    const property = demoProperties.find(item => item.id === id);
+    if (!db || !property || demoSaving) return;
+    if (hide && !window.confirm("¿Quitar del sitio la propiedad de demostración \"" + property.title + "\"? Se ocultará también su ficha pública.")) return;
+    setDemoSaving(id);
+    setError("");
+    try {
+      await setDoc(doc(db, "site", "public"), {
+        hiddenDemoIds: hide ? arrayUnion(id) : arrayRemove(id)
+      }, { merge: true });
+      flash(hide ? "Propiedad DEMO retirada de la web pública." : "Propiedad DEMO restaurada.");
+    } catch {
+      setError("No se pudo guardar el cambio de las propiedades DEMO.");
+    } finally {
+      setDemoSaving(null);
+    }
+  }
 
   const stats = useMemo(() => ({
     total: properties.length,
