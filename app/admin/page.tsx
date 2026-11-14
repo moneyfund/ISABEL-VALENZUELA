@@ -10,7 +10,7 @@ import {
   Globe2, ImagePlus, LayoutDashboard, LogOut, Plus, Save, ShieldAlert, Trash2, X
 } from "lucide-react";
 import { auth, db, firebaseReady, storage } from "@/lib/firebase";
-import { defaultSite, normalizeSiteContent, type Property, type PropertyCategory, type SiteContent, type Operation } from "@/lib/models";
+import { defaultSite, normalizeSiteContent, validPropertyCoordinates, type Property, type PropertyCategory, type SiteContent, type Operation } from "@/lib/models";
 import { cleanPropertyId, money, validImage } from "@/lib/format";
 import { demoProperties } from "@/lib/demo";
 import { contactEmail, safeSocialUrl, whatsappUrl } from "@/lib/social";
@@ -18,6 +18,7 @@ import SocialLinks from "@/components/SocialLinks";
 import { isAllowedAdminEmail } from "@/lib/admin-access";
 import GuideRequestsPanel from "@/components/admin/GuideRequestsPanel";
 import CategoryFields from "@/components/admin/CategoryFields";
+import PropertyMapEditor from "@/components/admin/PropertyMapEditor";
 import { cleanedPropertyDetails, hasAreaUnitSelector, hasBedrooms, hasBathrooms, hasLandArea, propertyCategoryInfo } from "@/lib/property-details";
 import "./property-form.css";
 import "./admin-requests.css";
@@ -27,7 +28,7 @@ type Tab = "overview" | "properties" | "content" | "requests";
 
 const emptyProperty = (): Property => ({
   id: "", title: "", category: "Casa", operation: "Venta", city: "",
-  location: "", price: 0, area: 0, areaUnit: "m2", bedrooms: 0, bathrooms: 0, details: {},
+  location: "", coordinates: null, price: 0, area: 0, areaUnit: "m2", bedrooms: 0, bathrooms: 0, details: {},
   images: [], description: "", highlights: [], featured: false, published: false,
   createdAt: Date.now()
 });
@@ -170,6 +171,10 @@ export default function AdminPage() {
       const payload: Property = {
         ...form, id, title: form.title.trim(), city: form.city.trim(), location: form.location.trim(),
         images: [...form.images.filter(validImage), ...uploaded],
+        coordinates: validPropertyCoordinates(form.coordinates) ? {
+          lat: Number(form.coordinates.lat.toFixed(6)),
+          lng: Number(form.coordinates.lng.toFixed(6))
+        } : null,
         highlights: form.highlights.filter(Boolean),
         price: Math.max(0, Number(form.price) || 0), area: Math.max(0, Number(form.area) || 0),
         bedrooms: hasBedrooms(form.category) ? Math.max(0, Number(form.bedrooms) || 0) : 0,
@@ -333,6 +338,7 @@ export default function AdminPage() {
               <p className="admin-category-panel__note">Al cambiar el tipo de propiedad se reinician únicamente las medidas y características específicas. El título, la ubicación, el precio, la descripción y las fotografías se conservan.</p>
             </div>
             <CategoryFields property={form} onUpdate={patch => setForm(previous => ({ ...previous, ...patch }))} />
+            <PropertyMapEditor coordinates={form.coordinates} onChange={coordinates => change("coordinates", coordinates)}/>
             <div className="admin-panel"><h3>Galería fotográfica</h3><p className="admin-hint">Sube varias imágenes JPEG, PNG o WebP a Firebase Storage. Máximo 8 MB por foto.</p><label className="upload-zone"><CloudUpload size={30}/><strong>Seleccionar imágenes</strong><span>{files.length ? `${files.length} archivo(s) seleccionado(s)` : "Arrastra o selecciona imágenes desde tu equipo"}</span><input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={e => setFiles(Array.from(e.target.files || []))}/></label>
               {form.images.length > 0 && <div className="image-editor">{form.images.map((url, i) => <div key={url + i}><img src={url} alt={`Imagen ${i+1}`}/><button type="button" title="Quitar de esta publicación" onClick={() => change("images", form.images.filter((_, n) => n !== i))}><X size={16}/></button></div>)}</div>}
               <label className="admin-url-label">También puedes añadir URLs HTTPS de imágenes (una por línea)<textarea rows={3} value={form.images.join("\n")} onChange={e => change("images", e.target.value.split("\n").map(s => s.trim()).filter(Boolean))} placeholder="https://..."/></label>
