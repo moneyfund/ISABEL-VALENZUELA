@@ -103,6 +103,8 @@ export const defaultSite: SiteContent = {
  */
 export function normalizeSiteContent(source: Partial<SiteContent> | null | undefined): SiteContent {
   const site = { ...defaultSite, ...(source || {}) };
+  // Ignore obsolete keys from earlier site versions when editing public content.
+  delete (site as typeof site & { hiddenDemoIds?: unknown }).hiddenDemoIds;
   return {
     ...site,
     // Upgrade the low-resolution portrait reference in existing site/public records,
