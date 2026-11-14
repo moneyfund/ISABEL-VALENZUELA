@@ -1,6 +1,25 @@
 export type PropertyCategory = "Casa" | "Apartamento" | "Terreno" | "Finca" | "Comercial";
 export type Operation = "Venta" | "Alquiler";
 
+export type PropertyAreaUnit = "m2" | "mz";
+
+export interface PropertyDetails {
+  parkingSpaces?: number;
+  levels?: number;
+  floorNumber?: number;
+  furnishing?: string;
+  topography?: string;
+  accessType?: string;
+  landUse?: string;
+  farmUse?: string;
+  commercialType?: string;
+  frontMeters?: number;
+  depthMeters?: number;
+  services?: string[];
+  features?: string[];
+}
+
+
 export interface Property {
   id: string;
   title: string;
@@ -10,7 +29,9 @@ export interface Property {
   location: string;
   price: number;
   area: number;
+  areaUnit?: PropertyAreaUnit;
   landArea?: number;
+  details?: PropertyDetails;
   bedrooms: number;
   bathrooms: number;
   images: string[];
