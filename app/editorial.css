@@ -227,3 +227,40 @@ h1,h2,h3 { letter-spacing:-.035em; }
   .iv-hero__background img { width:100%; opacity:.055; }
   .iv-introduction h2 { font-size:clamp(36px,9vw,47px); }
 }
+
+/* Purchase guide preview as an editorial bridge, not another heavy landing hero. */
+.iv-guide-teaser { background:#eee9e0; border-top:1px solid #ded9cb; border-bottom:1px solid #ddd5c6; }
+.iv-guide-teaser__inner { min-height:210px; display:flex; align-items:center; gap:35px; padding-top:27px; padding-bottom:27px; }
+.iv-guide-teaser__symbol { width:98px; height:105px; flex-shrink:0; display:grid; place-items:center; background:#0b3037; padding:12px; }
+.iv-guide-teaser__symbol img { display:block; width:100%; height:100%; object-fit:contain; }
+.iv-guide-teaser__copy { flex:1; }
+.iv-guide-teaser__copy .iv-eyebrow { margin:0 0 11px; }
+.iv-guide-teaser__copy h2 { font-family:"Source Serif 4",Georgia,serif; font-weight:500; color:#11343a; font-size:clamp(25px,2.8vw,39px); line-height:1.2; margin:0 0 9px; }
+.iv-guide-teaser__copy > p:last-child { margin:0; color:#6e7a75; font-size:12px; line-height:1.8; max-width:630px; }
+.iv-guide-teaser__link { flex-shrink:0; padding:16px 20px; min-height:48px; display:flex; align-items:center; gap:18px; color:#fff; background:#0b3037; font-size:11px; font-weight:600; }
+.iv-guide-teaser__link:hover { background:#1b4b50; }
+.nav__links { gap:23px; }
+.nav__links > a { font-size:11px; white-space:nowrap; }
+.brand { width:236px; }
+.brand--compact { width:221px; }
+@media(max-width:1120px) {
+  .nav__links { gap:15px; }
+  .brand { width:202px; }
+  .nav__links > a { font-size:10px; }
+}
+@media(max-width:860px) {
+  .nav__toggle { display:block; }
+  .nav__links { display:none; position:absolute; top:84px; left:0; right:0; padding:23px 20px 30px; background:rgba(9,35,39,.98); box-shadow:0 20px 40px rgba(0,0,0,.2); }
+  .nav__links--open { display:flex; flex-direction:column; align-items:stretch; gap:0; }
+  .nav__links > a { font-size:13px; padding:15px; border-bottom:1px solid rgba(255,255,255,.1); }
+  .nav__links .nav__contact { padding:15px; }
+}
+@media(max-width:680px) {
+  .nav__links { top:75px; }
+  .iv-guide-teaser__inner { gap:16px; flex-wrap:wrap; padding-top:30px; padding-bottom:30px; }
+  .iv-guide-teaser__symbol { width:67px; height:80px; }
+  .iv-guide-teaser__copy { min-width:calc(100% - 100px); }
+  .iv-guide-teaser__copy h2 { font-size:26px; }
+  .iv-guide-teaser__link { margin-left:83px; }
+  .brand { width:191px; }
+}

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 225" role="img" aria-labelledby="symbolTitle">
+<title id="symbolTitle">Emblema Isabel Valenzuela, IV Bienes Raíces</title>
+<defs>
+  <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="80%">
+    <stop offset="0%" stop-color="#F5DFAD"/>
+    <stop offset="52%" stop-color="#D3A75F"/>
+    <stop offset="100%" stop-color="#A97931"/>
+  </linearGradient>
+  <linearGradient id="e" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7CC4A3"/><stop offset="1" stop-color="#25786D"/></linearGradient>
+</defs>
+<path d="M16 88 L110 23 L210 88" fill="none" stroke="url(#g)" stroke-width="6" stroke-linejoin="miter"/>
+<path d="M176 40 V28 H189 V65" fill="none" stroke="url(#g)" stroke-width="4"/>
+<g fill="url(#g)"><rect x="103" y="53" width="11" height="11"/><rect x="118" y="53" width="11" height="11"/><rect x="103" y="68" width="11" height="11"/><rect x="118" y="68" width="11" height="11"/></g>
+<text x="17" y="194" font-size="126" font-weight="700" letter-spacing="-15" fill="url(#g)" font-family="Georgia,'Times New Roman',serif">IV</text>
+<g fill="url(#e)"><rect x="150" y="161" width="16" height="33"/><rect x="171" y="138" width="16" height="56"/><rect x="192" y="115" width="16" height="79"/></g>
+<path d="M160 127 L179 111 L195 115 L219 86" fill="none" stroke="url(#g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M219 86 L206 91 L216 101 Z" fill="url(#g)"/>
+</svg>

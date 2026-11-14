@@ -9,6 +9,7 @@ import Brand from "./Brand";
 const pages = [
   { title: "Inicio", href: "/" },
   { title: "Propiedades", href: "/propiedades" },
+  { title: "Guía de compra", href: "/guia-de-compra" },
   { title: "Servicios", href: "/servicios" },
   { title: "Sobre Isabel", href: "/sobre-isabel" },
   { title: "Contacto", href: "/contacto" }
