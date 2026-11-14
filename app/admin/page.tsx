@@ -10,7 +10,7 @@ import {
   Globe2, ImagePlus, LayoutDashboard, LogOut, Plus, Save, ShieldAlert, Trash2, X
 } from "lucide-react";
 import { auth, db, firebaseReady, storage } from "@/lib/firebase";
-import { defaultSite, normalizeSiteContent, type Property, type PropertyCategory, type SiteContent, type Operation } from "@/lib/models";
+import { defaultSite, normalizeSiteContent, validPropertyCoordinates, type Property, type PropertyCategory, type SiteContent, type Operation } from "@/lib/models";
 import { cleanPropertyId, money, validImage } from "@/lib/format";
 import { demoProperties } from "@/lib/demo";
 import { contactEmail, safeSocialUrl, whatsappUrl } from "@/lib/social";
@@ -18,6 +18,7 @@ import SocialLinks from "@/components/SocialLinks";
 import { isAllowedAdminEmail } from "@/lib/admin-access";
 import GuideRequestsPanel from "@/components/admin/GuideRequestsPanel";
 import CategoryFields from "@/components/admin/CategoryFields";
+import PropertyMapEditor from "@/components/admin/PropertyMapEditor";
 import { cleanedPropertyDetails, hasAreaUnitSelector, hasBedrooms, hasBathrooms, hasLandArea, propertyCategoryInfo } from "@/lib/property-details";
 import "./property-form.css";
 import "./admin-requests.css";
@@ -27,7 +28,7 @@ type Tab = "overview" | "properties" | "content" | "requests";
 
 const emptyProperty = (): Property => ({
   id: "", title: "", category: "Casa", operation: "Venta", city: "",
-  location: "", price: 0, area: 0, areaUnit: "m2", bedrooms: 0, bathrooms: 0, details: {},
+  location: "", coordinates: null, price: 0, area: 0, areaUnit: "m2", bedrooms: 0, bathrooms: 0, details: {},
   images: [], description: "", highlights: [], featured: false, published: false,
   createdAt: Date.now()
 });
@@ -91,14 +92,14 @@ export default function AdminPage() {
   async function updateDemoVisibility(id: string, hide: boolean) {
     const property = demoProperties.find(item => item.id === id);
     if (!db || !property || demoSaving) return;
-    if (hide && !window.confirm("¿Quitar del sitio la propiedad de demostración \"" + property.title + "\"? Se ocultará también su ficha pública.")) return;
+    if (hide && !window.confirm("¿Retirar de la lista interna la propiedad de demostración \"" + property.title + "\"? La ficha no se ofrece públicamente.")) return;
     setDemoSaving(id);
     setError("");
     try {
       await setDoc(doc(db, "site", "public"), {
         hiddenDemoIds: hide ? arrayUnion(id) : arrayRemove(id)
       }, { merge: true });
-      flash(hide ? "Propiedad DEMO retirada de la web pública." : "Propiedad DEMO restaurada.");
+      flash(hide ? "Propiedad DEMO retirada de la lista interna." : "Propiedad DEMO restaurada a la lista interna.");
     } catch {
       setError("No se pudo guardar el cambio de las propiedades DEMO.");
     } finally {
@@ -170,6 +171,10 @@ export default function AdminPage() {
       const payload: Property = {
         ...form, id, title: form.title.trim(), city: form.city.trim(), location: form.location.trim(),
         images: [...form.images.filter(validImage), ...uploaded],
+        coordinates: validPropertyCoordinates(form.coordinates) ? {
+          lat: Number(form.coordinates.lat.toFixed(6)),
+          lng: Number(form.coordinates.lng.toFixed(6))
+        } : null,
         highlights: form.highlights.filter(Boolean),
         price: Math.max(0, Number(form.price) || 0), area: Math.max(0, Number(form.area) || 0),
         bedrooms: hasBedrooms(form.category) ? Math.max(0, Number(form.bedrooms) || 0) : 0,
@@ -292,8 +297,8 @@ export default function AdminPage() {
           <div className="admin-panel">{properties.length ? <div className="admin-list">{properties.map(property => <div className="admin-list__row" key={property.id}><img src={property.images?.[0] || "/property-fallback.svg"} alt="" width={76} height={57} /><div><strong>{property.title}</strong><small>{property.city} · {money(property.price)}</small></div><span className={property.published ? "admin-tag admin-tag--on" : "admin-tag"}>{property.published ? "Publicada" : "Borrador"}</span><div className="admin-list__actions"><button onClick={() => toggleProperty(property)} title={property.published ? "Pasar a borrador" : "Publicar"}><Globe2 size={17}/></button><button onClick={() => startEdit(property)} title="Editar"><FilePenLine size={17}/></button><button className="admin-danger" onClick={() => removeProperty(property)} title="Eliminar"><Trash2 size={17}/></button></div></div>)}</div> : <div className="admin-empty"><Building2 size={30}/><h3>Tu catálogo empieza aquí.</h3><p>Crea una propiedad y comienza a construir tu portafolio.</p><button className="btn btn--dark" onClick={startNew}>Agregar primera propiedad <Plus size={17}/></button></div>}</div>
           <div className="admin-panel demo-manager">
             <div className="admin-panel__title">
-              <div><h3>Propiedades DEMO</h3><p className="demo-manager__description">Estas son las seis fichas ilustrativas de la web. No son propiedades reales ni anuncios almacenados en Firestore. Podés retirarlas individualmente.</p></div>
-              <span className="demo-manager__counter">{visibleDemos.length} visibles</span>
+              <div><h3>Propiedades DEMO</h3><p className="demo-manager__description">Seis fichas de prueba, visibles solo en el administrador. No forman parte del catálogo público. Podés retirarlas individualmente.</p></div>
+              <span className="demo-manager__counter">{visibleDemos.length} pendientes</span>
             </div>
             {visibleDemos.length > 0 ? <div className="admin-list">
               {visibleDemos.map(property => <div className="admin-list__row" key={property.id}>
@@ -305,13 +310,13 @@ export default function AdminPage() {
                   <Trash2 size={17}/> Quitar
                 </button>
               </div>)}
-            </div> : <p className="admin-empty">Ya no hay propiedades de demostración visibles.</p>}
+            </div> : <p className="admin-empty">Ya retiraste todos los ejemplos de la lista interna.</p>}
             {hiddenDemos.length > 0 && <div className="demo-manager__hidden">
-              <strong>Retiradas ({hiddenDemos.length})</strong>
+              <strong>Ejemplos archivados ({hiddenDemos.length})</strong>
               {hiddenDemos.map(property => <div key={property.id}>
                 <span>{property.title}</span>
                 <button type="button" disabled={demoSaving !== null}
-                  onClick={() => void updateDemoVisibility(property.id, false)}>Restaurar</button>
+                  onClick={() => void updateDemoVisibility(property.id, false)}>Restaurar ejemplo</button>
               </div>)}
             </div>}
           </div>
@@ -333,6 +338,7 @@ export default function AdminPage() {
               <p className="admin-category-panel__note">Al cambiar el tipo de propiedad se reinician únicamente las medidas y características específicas. El título, la ubicación, el precio, la descripción y las fotografías se conservan.</p>
             </div>
             <CategoryFields property={form} onUpdate={patch => setForm(previous => ({ ...previous, ...patch }))} />
+            <PropertyMapEditor coordinates={form.coordinates} onChange={coordinates => change("coordinates", coordinates)}/>
             <div className="admin-panel"><h3>Galería fotográfica</h3><p className="admin-hint">Sube varias imágenes JPEG, PNG o WebP a Firebase Storage. Máximo 8 MB por foto.</p><label className="upload-zone"><CloudUpload size={30}/><strong>Seleccionar imágenes</strong><span>{files.length ? `${files.length} archivo(s) seleccionado(s)` : "Arrastra o selecciona imágenes desde tu equipo"}</span><input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={e => setFiles(Array.from(e.target.files || []))}/></label>
               {form.images.length > 0 && <div className="image-editor">{form.images.map((url, i) => <div key={url + i}><img src={url} alt={`Imagen ${i+1}`}/><button type="button" title="Quitar de esta publicación" onClick={() => change("images", form.images.filter((_, n) => n !== i))}><X size={16}/></button></div>)}</div>}
               <label className="admin-url-label">También puedes añadir URLs HTTPS de imágenes (una por línea)<textarea rows={3} value={form.images.join("\n")} onChange={e => change("images", e.target.value.split("\n").map(s => s.trim()).filter(Boolean))} placeholder="https://..."/></label>

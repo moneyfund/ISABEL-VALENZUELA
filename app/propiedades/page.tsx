@@ -46,7 +46,7 @@ export default function PropertiesPage() {
         <button className="catalog__clear" onClick={clear}><RotateCcw size={16}/> Limpiar</button>
       </div>
       <div className="catalog__summary"><div><p className="eyebrow eyebrow--dark"><MapPin size={13}/> SELECCIÓN INMOBILIARIA</p><h2>Explora las propiedades</h2></div><span>{loading ? "Buscando..." : `${found.length} ${found.length === 1 ? "propiedad" : "propiedades"}`}</span></div>
-      {properties.some(p=>p.demo) && <p className="demo-notice">Catálogo de demostración: las fichas DEMO son ficticias y sus datos no constituyen ofertas reales.</p>}
+      
       {error && <p className="status-error" role="alert">{error}</p>}
       <div className="properties-grid">{found.slice(0,show).map((p,i)=><PropertyCard key={p.id} property={p} index={i}/>)}</div>
       {!loading && !found.length && <div className="empty-results"><Search size={32}/><h3>No hay inmuebles con esos filtros.</h3><p>Prueba otras palabras o consulta directamente con Isabel.</p><button onClick={clear} className="btn btn--outline">Mostrar todos <ArrowRight size={16}/></button></div>}

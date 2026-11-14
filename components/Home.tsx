@@ -80,7 +80,7 @@ export default function Home() {
           <div><p className="iv-eyebrow">PORTAFOLIO INMOBILIARIO</p><h2>Propiedades destacadas</h2></div>
           <Link href="/propiedades" className="iv-simple-link">Ver todas <ArrowUpRight size={18}/></Link>
         </div>
-        {selection.some(p => p.demo) && <p className="iv-demo-note">Propiedades de demostración. Precios y características ilustrativos, no son ofertas reales.</p>}
+        
         <div className="iv-featured__grid">
           {selection.map((property, i) => <PropertyCard key={property.id} property={property} index={i}/>)}
         </div>

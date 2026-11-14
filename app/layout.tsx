@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./editorial.css";
+import "./property-map.css";
 
 export const metadata: Metadata = {
   title: { default: "Isabel Valenzuela | Bienes Raíces", template: "%s | Isabel Valenzuela" },

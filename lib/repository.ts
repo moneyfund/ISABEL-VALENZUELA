@@ -1,58 +1,29 @@
 import { collection, doc, getDoc, onSnapshot, query, where } from "firebase/firestore";
 import { db, firebaseReady } from "./firebase";
-import { demoProperties } from "./demo";
-import { defaultSite, normalizeSiteContent, type Property, type SiteContent } from "./models";
+import { type Property, type SiteContent, defaultSite, normalizeSiteContent } from "./models";
 
+/**
+ * The public catalog only includes actual published Firestore listings.
+ * Sample listings remain editable/removable under Admin > Properties > DEMO.
+ */
 export function subscribeProperties(
   next: (items: Property[]) => void, fail: (error: Error) => void
 ): () => void {
   if (!firebaseReady || !db) {
-    next(demoProperties);
+    next([]);
     return () => {};
   }
-
-  let published: Property[] | null = null;
-  let hiddenDemoIds: string[] | null = null;
-  let active = true;
-
-  function sendCatalog() {
-    if (!active || published === null || hiddenDemoIds === null) return;
-    // Demo cards are local examples, not Firestore properties. When there are
-    // real published listings they are not mixed into the public catalog.
-    const availableDemos = demoProperties.filter(item => !hiddenDemoIds!.includes(item.id));
-    next(published.length ? published : availableDemos);
-  }
-
-  function failCatalog(error: Error) {
-    if (!active) return;
-    // Never reintroduce hidden demo cards when a Firestore read fails.
-    next([]);
-    fail(error);
-  }
-
-  const stopProperties = onSnapshot(
+  return onSnapshot(
     query(collection(db, "properties"), where("published", "==", true)),
     snapshot => {
-      published = snapshot.docs.map(item => ({ ...item.data(), id: item.id } as Property))
+      const listings = snapshot.docs
+        .map(item => ({ ...item.data(), id: item.id } as Property))
+        .filter(item => !item.demo)
         .sort((a, b) => b.createdAt - a.createdAt);
-      sendCatalog();
+      next(listings);
     },
-    failCatalog
+    error => { next([]); fail(error); }
   );
-  const stopSite = onSnapshot(
-    doc(db, "site", "public"),
-    snapshot => {
-      hiddenDemoIds = normalizeSiteContent(snapshot.exists() ? snapshot.data() : null).hiddenDemoIds;
-      sendCatalog();
-    },
-    failCatalog
-  );
-
-  return () => {
-    active = false;
-    stopProperties();
-    stopSite();
-  };
 }
 
 export function subscribeSite(next: (content: SiteContent) => void, fail: (error: Error) => void): () => void {
@@ -67,17 +38,9 @@ export function subscribeSite(next: (content: SiteContent) => void, fail: (error
 }
 
 export async function getProperty(id: string): Promise<Property | null> {
-  if (id.startsWith("demo-")) {
-    const demo = demoProperties.find(item => item.id === id);
-    if (!demo) return null;
-    if (!firebaseReady || !db) return demo;
-    // An archived example must also disappear from its direct URL.
-    const site = await getDoc(doc(db, "site", "public"));
-    const hiddenIds = normalizeSiteContent(site.exists() ? site.data() : null).hiddenDemoIds;
-    return hiddenIds.includes(id) ? null : demo;
-  }
-  if (!firebaseReady || !db) return null;
+  // Do not expose fictitious property cards (even via direct /propiedades/demo-* URLs).
+  if (id.startsWith("demo-") || !firebaseReady || !db) return null;
   const snapshot = await getDoc(doc(db, "properties", id));
   const data = snapshot.exists() ? ({ ...snapshot.data(), id: snapshot.id } as Property) : null;
-  return data?.published ? data : null;
+  return data?.published && !data.demo ? data : null;
 }

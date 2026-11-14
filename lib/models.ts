@@ -20,6 +20,20 @@ export interface PropertyDetails {
 }
 
 
+export interface PropertyCoordinates {
+  lat: number;
+  lng: number;
+}
+
+export function validPropertyCoordinates(value: unknown): value is PropertyCoordinates {
+  if (!value || typeof value !== "object") return false;
+  const coords = value as Partial<PropertyCoordinates>;
+  return typeof coords.lat === "number"
+    && Number.isFinite(coords.lat) && coords.lat >= -90 && coords.lat <= 90
+    && typeof coords.lng === "number"
+    && Number.isFinite(coords.lng) && coords.lng >= -180 && coords.lng <= 180;
+}
+
 export interface Property {
   id: string;
   title: string;
@@ -27,6 +41,7 @@ export interface Property {
   operation: Operation;
   city: string;
   location: string;
+  coordinates?: PropertyCoordinates | null;
   price: number;
   area: number;
   areaUnit?: PropertyAreaUnit;
