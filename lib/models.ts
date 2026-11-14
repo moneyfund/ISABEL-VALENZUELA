@@ -61,6 +61,7 @@ export interface SiteContent {
   instagram: string;
   facebook: string;
   tiktok: string;
+  hiddenDemoIds: string[];
 }
 
 export const defaultSite: SiteContent = {
@@ -80,7 +81,8 @@ export const defaultSite: SiteContent = {
   email: "",
   instagram: "",
   facebook: "",
-  tiktok: ""
+  tiktok: "",
+  hiddenDemoIds: []
 };
 
 /**
@@ -91,6 +93,9 @@ export function normalizeSiteContent(source: Partial<SiteContent> | null | undef
   const site = { ...defaultSite, ...(source || {}) };
   return {
     ...site,
+    hiddenDemoIds: Array.isArray(site.hiddenDemoIds)
+      ? [...new Set(site.hiddenDemoIds.filter((id): id is string => typeof id === "string" && /^demo-[a-z0-9-]+$/.test(id)))]
+      : [],
     // Upgrade the low-resolution portrait reference in existing site/public records,
     // without changing any custom photograph Isabel may have selected.
     aboutImage: !site.aboutImage || site.aboutImage === "/isabel-valenzuela.webp"

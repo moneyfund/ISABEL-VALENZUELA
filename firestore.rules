@@ -12,57 +12,62 @@ service cloud.firestore {
         );
     }
 
+    // Public website content and administrative demo visibility preferences.
     match /site/{pageId} {
       allow get: if pageId == 'public';
       allow list: if false;
       allow create, update, delete: if pageId == 'public' && isAdmin();
     }
 
+    // Public reads of published listings only; authenticated admin may manage.
     match /properties/{propertyId} {
       allow get, list: if isAdmin() || resource.data.published == true;
       allow create, update, delete: if isAdmin();
     }
 
-    // Consultas enviadas desde la guía pública. Datos privados.
-    // El público solo puede crear solicitudes con el esquema validado;
-    // nunca leer, listar ni modificar las respuestas de otras personas.
+    // Public can create consented requests with a strictly validated schema.
+    // Names, phone numbers, incomes and budgets are NEVER public-readable.
     function validGuideRequest() {
       let data = request.resource.data;
       let fields = [
-        'firstName', 'lastName', 'payment', 'property', 'income',
+        'firstName', 'lastName', 'phone', 'payment', 'property', 'income',
         'residence', 'documents', 'identified', 'price', 'savings',
         'consent', 'status', 'createdAt'
       ];
+
       return data.keys().hasAll(fields)
         && data.keys().hasOnly(fields)
         && data.firstName is string
-        && data.firstName.size() >= 2 && data.firstName.size() <= 60
+        && data.firstName.size() >= 2
+        && data.firstName.size() <= 60
         && data.lastName is string
-        && data.lastName.size() >= 2 && data.lastName.size() <= 60
+        && data.lastName.size() >= 2
+        && data.lastName.size() <= 60
+        && data.phone is string
+        && data.phone.matches('^\\+[1-9][0-9]{7,14}$')
         && data.payment in ['credito', 'contado']
         && data.property in ['casa', 'apartamento', 'terreno', 'finca', 'local']
         && data.income in ['asalariado', 'independiente', 'mixto', 'extranjero', 'no-comprobable']
         && data.residence in ['nicaragua', 'nic-exterior', 'extranjero']
         && data.documents in ['confirmado', 'pendiente', 'desconocido']
         && data.identified is bool
-        && (data.price == null || (data.price is number && data.price >= 0 && data.price <= 100000000))
-        && (data.savings == null || (data.savings is number && data.savings >= 0 && data.savings <= 100000000))
+        && (
+          data.price == null ||
+          (data.price is number && data.price >= 0 && data.price <= 100000000)
+        )
+        && (
+          data.savings == null ||
+          (data.savings is number && data.savings >= 0 && data.savings <= 100000000)
+        )
         && data.consent == true
         && data.status == 'nuevo'
         && data.createdAt == request.time;
     }
 
     match /purchase_requests/{requestId} {
-      allow create: if requestId.matches('^[A-Za-z0-9]{20}
-      allow read, write: if false;
-    }
-  }
-}
-)
+      allow create: if requestId.matches('^[A-Za-z0-9]{20}$')
         && validGuideRequest();
-
       allow get, list: if isAdmin();
-      // Sólo el equipo puede actualizar el estado; las respuestas son inmutables.
       allow update: if isAdmin()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
         && request.resource.data.status in ['nuevo', 'contactado', 'atendido'];

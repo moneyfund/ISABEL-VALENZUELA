@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { getIdTokenResult, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, type User } from "firebase/auth";
-import { collection, deleteDoc, doc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
+import { arrayRemove, arrayUnion, collection, deleteDoc, doc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import {
   ArrowLeft, ArrowUpRight, Building2, CheckCircle2, CloudUpload, FilePenLine,
@@ -12,6 +12,7 @@ import {
 import { auth, db, firebaseReady, storage } from "@/lib/firebase";
 import { defaultSite, normalizeSiteContent, type Property, type PropertyCategory, type SiteContent, type Operation } from "@/lib/models";
 import { cleanPropertyId, money, validImage } from "@/lib/format";
+import { demoProperties } from "@/lib/demo";
 import { contactEmail, safeSocialUrl, whatsappUrl } from "@/lib/social";
 import SocialLinks from "@/components/SocialLinks";
 import { isAllowedAdminEmail } from "@/lib/admin-access";
@@ -41,6 +42,7 @@ export default function AdminPage() {
   const [editing, setEditing] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
+  const [demoSaving, setDemoSaving] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
 
@@ -81,6 +83,28 @@ export default function AdminPage() {
     });
     return () => { active = false; stopAuth(); unsubProperties?.(); unsubSite?.(); };
   }, []);
+
+
+  const visibleDemos = demoProperties.filter(property => !site.hiddenDemoIds.includes(property.id));
+  const hiddenDemos = demoProperties.filter(property => site.hiddenDemoIds.includes(property.id));
+
+  async function updateDemoVisibility(id: string, hide: boolean) {
+    const property = demoProperties.find(item => item.id === id);
+    if (!db || !property || demoSaving) return;
+    if (hide && !window.confirm("¿Quitar del sitio la propiedad de demostración \"" + property.title + "\"? Se ocultará también su ficha pública.")) return;
+    setDemoSaving(id);
+    setError("");
+    try {
+      await setDoc(doc(db, "site", "public"), {
+        hiddenDemoIds: hide ? arrayUnion(id) : arrayRemove(id)
+      }, { merge: true });
+      flash(hide ? "Propiedad DEMO retirada de la web pública." : "Propiedad DEMO restaurada.");
+    } catch {
+      setError("No se pudo guardar el cambio de las propiedades DEMO.");
+    } finally {
+      setDemoSaving(null);
+    }
+  }
 
   const stats = useMemo(() => ({
     total: properties.length,
@@ -266,6 +290,31 @@ export default function AdminPage() {
         {!editing ? <>
           <div className="admin__section-header"><div><p>Gestiona tus anuncios, imágenes, precios y su visibilidad pública.</p><h2>Inventario inmobiliario</h2></div><button className="btn btn--dark" onClick={startNew}>Agregar propiedad <Plus size={18}/></button></div>
           <div className="admin-panel">{properties.length ? <div className="admin-list">{properties.map(property => <div className="admin-list__row" key={property.id}><img src={property.images?.[0] || "/property-fallback.svg"} alt="" width={76} height={57} /><div><strong>{property.title}</strong><small>{property.city} · {money(property.price)}</small></div><span className={property.published ? "admin-tag admin-tag--on" : "admin-tag"}>{property.published ? "Publicada" : "Borrador"}</span><div className="admin-list__actions"><button onClick={() => toggleProperty(property)} title={property.published ? "Pasar a borrador" : "Publicar"}><Globe2 size={17}/></button><button onClick={() => startEdit(property)} title="Editar"><FilePenLine size={17}/></button><button className="admin-danger" onClick={() => removeProperty(property)} title="Eliminar"><Trash2 size={17}/></button></div></div>)}</div> : <div className="admin-empty"><Building2 size={30}/><h3>Tu catálogo empieza aquí.</h3><p>Crea una propiedad y comienza a construir tu portafolio.</p><button className="btn btn--dark" onClick={startNew}>Agregar primera propiedad <Plus size={17}/></button></div>}</div>
+          <div className="admin-panel demo-manager">
+            <div className="admin-panel__title">
+              <div><h3>Propiedades DEMO</h3><p className="demo-manager__description">Estas son las seis fichas ilustrativas de la web. No son propiedades reales ni anuncios almacenados en Firestore. Podés retirarlas individualmente.</p></div>
+              <span className="demo-manager__counter">{visibleDemos.length} visibles</span>
+            </div>
+            {visibleDemos.length > 0 ? <div className="admin-list">
+              {visibleDemos.map(property => <div className="admin-list__row" key={property.id}>
+                <img src={property.images?.[0] || "/property-fallback.svg"} alt="" width={76} height={57}/>
+                <div><strong>{property.title}</strong><small>{property.city} · Ejemplo ficticio</small></div>
+                <span className="admin-tag demo-manager__demo-tag">DEMO</span>
+                <button type="button" className="admin-danger demo-manager__remove" disabled={demoSaving !== null}
+                  onClick={() => void updateDemoVisibility(property.id, true)} title="Quitar propiedad DEMO">
+                  <Trash2 size={17}/> Quitar
+                </button>
+              </div>)}
+            </div> : <p className="admin-empty">Ya no hay propiedades de demostración visibles.</p>}
+            {hiddenDemos.length > 0 && <div className="demo-manager__hidden">
+              <strong>Retiradas ({hiddenDemos.length})</strong>
+              {hiddenDemos.map(property => <div key={property.id}>
+                <span>{property.title}</span>
+                <button type="button" disabled={demoSaving !== null}
+                  onClick={() => void updateDemoVisibility(property.id, false)}>Restaurar</button>
+              </div>)}
+            </div>}
+          </div>
         </> : <>
           <div className="admin__section-header"><div><button className="admin-back" onClick={() => {setEditing(false); setFiles([]);}}><ArrowLeft size={17}/> Volver al inventario</button><h2>{form.id ? "Editar propiedad" : "Nueva propiedad"}</h2><p>Todos los cambios se almacenarán en tu proyecto Firebase.</p></div></div>
           <form onSubmit={saveProperty} className="admin-form">

@@ -10,17 +10,49 @@ export function subscribeProperties(
     next(demoProperties);
     return () => {};
   }
-  return onSnapshot(
+
+  let published: Property[] | null = null;
+  let hiddenDemoIds: string[] | null = null;
+  let active = true;
+
+  function sendCatalog() {
+    if (!active || published === null || hiddenDemoIds === null) return;
+    // Demo cards are local examples, not Firestore properties. When there are
+    // real published listings they are not mixed into the public catalog.
+    const availableDemos = demoProperties.filter(item => !hiddenDemoIds!.includes(item.id));
+    next(published.length ? published : availableDemos);
+  }
+
+  function failCatalog(error: Error) {
+    if (!active) return;
+    // Never reintroduce hidden demo cards when a Firestore read fails.
+    next([]);
+    fail(error);
+  }
+
+  const stopProperties = onSnapshot(
     query(collection(db, "properties"), where("published", "==", true)),
     snapshot => {
-      const items = snapshot.docs.map(item => ({ ...item.data(), id: item.id } as Property))
+      published = snapshot.docs.map(item => ({ ...item.data(), id: item.id } as Property))
         .sort((a, b) => b.createdAt - a.createdAt);
-      // Demo fichas remain visible until an actual listing is published.
-      // No fictitious item is written to Firestore.
-      next(items.length ? items : demoProperties);
+      sendCatalog();
     },
-    error => { next(demoProperties); fail(error); }
+    failCatalog
   );
+  const stopSite = onSnapshot(
+    doc(db, "site", "public"),
+    snapshot => {
+      hiddenDemoIds = normalizeSiteContent(snapshot.exists() ? snapshot.data() : null).hiddenDemoIds;
+      sendCatalog();
+    },
+    failCatalog
+  );
+
+  return () => {
+    active = false;
+    stopProperties();
+    stopSite();
+  };
 }
 
 export function subscribeSite(next: (content: SiteContent) => void, fail: (error: Error) => void): () => void {
@@ -35,7 +67,15 @@ export function subscribeSite(next: (content: SiteContent) => void, fail: (error
 }
 
 export async function getProperty(id: string): Promise<Property | null> {
-  if (id.startsWith("demo-")) return demoProperties.find(p => p.id === id) || null;
+  if (id.startsWith("demo-")) {
+    const demo = demoProperties.find(item => item.id === id);
+    if (!demo) return null;
+    if (!firebaseReady || !db) return demo;
+    // An archived example must also disappear from its direct URL.
+    const site = await getDoc(doc(db, "site", "public"));
+    const hiddenIds = normalizeSiteContent(site.exists() ? site.data() : null).hiddenDemoIds;
+    return hiddenIds.includes(id) ? null : demo;
+  }
   if (!firebaseReady || !db) return null;
   const snapshot = await getDoc(doc(db, "properties", id));
   const data = snapshot.exists() ? ({ ...snapshot.data(), id: snapshot.id } as Property) : null;

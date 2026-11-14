@@ -192,3 +192,8 @@
   .purchase-submit-error { margin:0 24px 16px; }
   .purchase-reference { padding:13px;font-size:11px; }
 }
+
+
+.purchase-name-row__phone { grid-column:1/-1; }
+.purchase-name-row__phone small { color:#7c8a80; font-size:11px; line-height:1.7; }
+@media(max-width:650px) { .purchase-name-row__phone { grid-column:auto; } }
