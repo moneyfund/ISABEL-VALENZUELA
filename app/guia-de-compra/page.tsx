@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { db } from "@/lib/firebase";
-import { submitGuideRequest } from "@/lib/guide-requests";
+import { normalizeGuidePhone, submitGuideRequest } from "@/lib/guide-requests";
 import Link from "next/link";
 import {
   ArrowLeft, ArrowRight, ArrowUpRight, BadgeCheck, Check, CheckCircle2,
@@ -58,6 +58,7 @@ export default function PurchaseGuidePage() {
   const [copied, setCopied] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
   const [consent, setConsent] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState("");
@@ -71,7 +72,7 @@ export default function PurchaseGuidePage() {
   }
 
   const canNext = stage === 0
-    ? answers.payment !== null && firstName.trim().length >= 2 && lastName.trim().length >= 2 && firstName.trim().length <= 60 && lastName.trim().length <= 60
+    ? answers.payment !== null && firstName.trim().length >= 2 && lastName.trim().length >= 2 && firstName.trim().length <= 60 && lastName.trim().length <= 60 && normalizeGuidePhone(phone) !== null
     : stage === 1
       ? answers.property !== null && answers.documents !== null && answers.identified !== null
       : stage === 2
@@ -94,7 +95,7 @@ export default function PurchaseGuidePage() {
     setSending(true);
     setSendError("");
     try {
-      const code = await submitGuideRequest(db, firstName, lastName, answers, consent);
+      const code = await submitGuideRequest(db, firstName, lastName, phone, answers, consent);
       setReference(code);
       setStage(3);
       window.scrollTo({ top: 230, behavior: "smooth" });
@@ -109,6 +110,7 @@ export default function PurchaseGuidePage() {
     return [
       "GUÍA ORIENTATIVA DE COMPRA DE PROPIEDAD | ISABEL VALENZUELA",
       `Solicitante: ${firstName.trim()} ${lastName.trim()}`,
+      `Celular de contacto: ${normalizeGuidePhone(phone) || "No proporcionado"}`,
       `Referencia: ${reference || "sin enviar"}`,
       caseLabel, "Nicaragua. Requisitos sujetos al caso y a revisión profesional.",
       "", "DOCUMENTOS DEL COMPRADOR",
@@ -136,6 +138,7 @@ export default function PurchaseGuidePage() {
     setAnswers(initialAnswers);
     setFirstName("");
     setLastName("");
+    setPhone("");
     setConsent(false);
     setReference(null);
     setSendError("");
@@ -164,7 +167,7 @@ export default function PurchaseGuidePage() {
           <ol className="purchase-progress">{stageNames.map((name, index) => <li key={name} className={index === stage ? "purchase-progress__active" : index < stage ? "purchase-progress__done" : ""}>
             <span>{index < stage ? <Check size={14}/> : String(index + 1).padStart(2, "0")}</span><div><strong>{name}</strong><small>{index < stage ? "Completado" : index === stage ? "Paso actual" : "Pendiente"}</small></div>
           </li>)}</ol>
-          <div className="purchase-sidebar__note"><ShieldCheck size={23}/><p>Esta guía guarda tu nombre y las opciones elegidas para que Isabel pueda atenderte sin repetir las preguntas.</p></div>
+          <div className="purchase-sidebar__note"><ShieldCheck size={23}/><p>Esta guía guarda tu nombre, celular y respuestas para que Isabel pueda contactarte sin repetir las preguntas.</p></div>
         </aside>
 
         <div className="purchase-main">
@@ -182,6 +185,7 @@ export default function PurchaseGuidePage() {
                 <div className="purchase-name-row">
                   <label><span>Nombre <b>*</b></span><input required autoComplete="given-name" maxLength={60} minLength={2} value={firstName} onChange={e => { setFirstName(e.target.value); setSendError(""); }} placeholder="Tu nombre"/></label>
                   <label><span>Apellido <b>*</b></span><input required autoComplete="family-name" maxLength={60} minLength={2} value={lastName} onChange={e => { setLastName(e.target.value); setSendError(""); }} placeholder="Tu apellido"/></label>
+                  <label className="purchase-name-row__phone"><span>Número de celular <b>*</b></span><input required type="tel" inputMode="tel" autoComplete="tel" maxLength={24} value={phone} onChange={e => { setPhone(e.target.value); setSendError(""); }} placeholder="+505 8888 8888" aria-describedby="guide-phone-hint" /><small id="guide-phone-hint">Con código de país. Si escribís 8 dígitos, agregamos +505 automáticamente.</small></label>
                 </div>
               </div>
               <div className="purchase-field"><h3>Forma de pago</h3><ChoiceGrid items={paymentOptions} value={answers.payment} onChange={value => choose("payment", value)}/></div>
@@ -208,7 +212,7 @@ export default function PurchaseGuidePage() {
               </div>
               <label className="purchase-consent">
                 <input type="checkbox" checked={consent} onChange={e => { setConsent(e.target.checked); setSendError(""); }} />
-                <span>Autorizo enviar y guardar mi nombre, apellido, selección de inmueble, forma de pago, ingresos, residencia y presupuesto (si lo indiqué) para que Isabel Valenzuela pueda revisar mi consulta y darle seguimiento por WhatsApp. Comprendo que será visible solamente para las dos cuentas administradoras autorizadas y que puedo solicitar su eliminación.</span>
+                <span>Autorizo enviar y guardar mi nombre, apellido, número de celular, selección de inmueble, forma de pago, ingresos, residencia y presupuesto (si lo indiqué) para que Isabel Valenzuela pueda revisar mi consulta y contactarme por llamada o WhatsApp, aunque yo no le escriba primero. Comprendo que será visible solamente para las dos cuentas administradoras autorizadas y que puedo solicitar su eliminación.</span>
               </label>
               <p className="purchase-privacy"><LockKeyhole size={16}/> La guía aparece cuando Firestore confirma el registro. No pedimos cédula ni datos bancarios.</p>
             </div>}
