@@ -6,8 +6,9 @@ import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, MapPin, BedDouble, Bath, Ruler, CheckCircle2 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import PropertyLocationMap from "@/components/PropertyLocationMap";
 import { getProperty, subscribeSite } from "@/lib/repository";
-import { defaultSite, type Property, type SiteContent } from "@/lib/models";
+import { defaultSite, validPropertyCoordinates, type Property, type SiteContent } from "@/lib/models";
 import { contactLink, money, validImage } from "@/lib/format";
 import { categoryDetailsForDisplay, cleanedPropertyDetails, hasBathrooms, hasBedrooms, hasLandArea, propertyAreaLabel } from "@/lib/property-details";
 
@@ -25,7 +26,7 @@ export default function PropertyDetail() {
     return () => { active = false; unsubscribe(); };
   }, [params.id]);
   const images = property?.images?.filter(validImage) || [];
-  const contact = property && !property.demo ? contactLink(site.whatsapp, site.email, property.title) : null;
+  const contact = property ? contactLink(site.whatsapp, site.email, property.title) : null;
   const categoryFields = property ? categoryDetailsForDisplay(property) : [];
   const details = property ? cleanedPropertyDetails(property.category, property.details) : {};
   const extraFeatures = [...(details.features || []), ...(details.services || []), ...(property?.highlights || [])]
@@ -37,7 +38,7 @@ export default function PropertyDetail() {
     <div className="container detail-page__main">
       {loading ? <div className="detail-state">Cargando propiedad…</div> : !property ? <div className="detail-state"><h1>Esta propiedad no está disponible.</h1><p>Es posible que haya sido retirada o que aún no esté publicada.</p><Link className="btn btn--dark" href="/#propiedades">Volver al catálogo <ArrowUpRight size={17} /></Link></div> : <>
         <div className="detail-page__heading"><div><p className="eyebrow eyebrow--dark">{property.category} / {property.operation}</p><h1>{property.title}</h1><p><MapPin size={17} /> {property.location}</p></div><div className="detail-page__price"><small>PRECIO DE {property.operation.toUpperCase()}</small><strong>{money(property.price)}</strong></div></div>
-        {property.demo && <p className="demo-notice">PROPIEDAD DE DEMOSTRACIÓN. Datos, fotografías y precio exclusivamente ilustrativos; no está en venta ni alquiler.</p>}
+        
         <div className="detail-gallery">
           <div className="detail-gallery__main"><img src={images[imageIndex] || "/property-fallback.svg"} alt={property.title} /></div>
           {images.length > 1 && <div className="detail-gallery__thumbs">{images.map((src, i) => <button className={i === imageIndex ? "active" : ""} key={src + i} onClick={() => setImageIndex(i)} aria-label={`Ver foto ${i + 1}`}><img src={src} alt={`Vista ${i + 1}`} /></button>)}</div>}
@@ -52,8 +53,16 @@ export default function PropertyDetail() {
           </div>
           {extraFeatures.length > 0 && <div className="detail-highlights">
             {extraFeatures.map(item => <span key={item}><CheckCircle2 size={17}/> {item}</span>)}
-          </div>}</div>
-          <aside className="detail-page__aside"><p className="eyebrow eyebrow--gold">AGENDA UNA CONVERSACIÓN</p><h3>¿Es este tu próximo espacio?</h3><p>Conoce los detalles, consulta disponibilidad y recibe acompañamiento durante el proceso.</p>{contact ? <a className="btn btn--gold" target={contact.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" href={contact}>Solicitar información <ArrowUpRight size={17} /></a> : <span className="aside-pending">{property.demo ? "Ficha ilustrativa · no disponible para consultas" : "Contacto pendiente de configurar"}</span>}</aside>
+          </div>}
+          {validPropertyCoordinates(property.coordinates) && <section className="detail-location" aria-labelledby="property-map-heading">
+            <div className="detail-location__heading">
+              <div><h3 id="property-map-heading">Ubicación del inmueble</h3><p><MapPin size={16}/>{property.location}</p></div>
+              <a href={`https://www.openstreetmap.org/?mlat=${property.coordinates.lat}&mlon=${property.coordinates.lng}#map=16/${property.coordinates.lat}/${property.coordinates.lng}`}
+                target="_blank" rel="noopener noreferrer">Abrir mapa <ArrowUpRight size={15}/></a>
+            </div>
+            <PropertyLocationMap coordinates={property.coordinates}/>
+          </section>}</div>
+          <aside className="detail-page__aside"><p className="eyebrow eyebrow--gold">AGENDA UNA CONVERSACIÓN</p><h3>¿Es este tu próximo espacio?</h3><p>Conoce los detalles, consulta disponibilidad y recibe acompañamiento durante el proceso.</p>{contact ? <a className="btn btn--gold" target={contact.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" href={contact}>Solicitar información <ArrowUpRight size={17} /></a> : <span className="aside-pending">Contacto pendiente de configurar</span>}</aside>
         </div>
       </>}
     </div>
