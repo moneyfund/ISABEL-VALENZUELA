@@ -1,16 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 110" role="img" aria-labelledby="iv-title iv-desc">
-  <title id="iv-title">Isabel Valenzuela, Agente Inmobiliaria</title>
-  <desc id="iv-desc">Monograma IV de líneas precisas bajo una cubierta arquitectónica recta.</desc>
-  <g fill="none" stroke="#D5B57B" stroke-linecap="square" stroke-linejoin="miter">
-    <path d="M14 39 L49 12 L84 39" stroke-width="3.5"/>
-    <path d="M22 42 H76" stroke-width="1" opacity=".65"/>
-    <path d="M25 50 V88" stroke-width="5.5"/>
-    <path d="M39 50 L53 88 L67 50" stroke-width="5.5"/>
-    <path d="M14 98 H84" stroke-width="1" opacity=".55"/>
-  </g>
-  <path d="M101 20 V94" stroke="#D5B57B" stroke-width="1" opacity=".55"/>
-  <text x="123" y="50" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-weight="400" letter-spacing="2.4" fill="#F6F2E9">ISABEL</text>
-  <text x="123" y="80" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="400" letter-spacing="1.65" fill="#F6F2E9">VALENZUELA</text>
-  <path d="M123 91 H454" stroke="#D5B57B" stroke-width=".9" opacity=".85"/>
-  <text x="124" y="105" font-family="Arial, sans-serif" font-size="9" font-weight="500" letter-spacing="3" fill="#D5B57B">AGENTE INMOBILIARIA</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 690 178" role="img" aria-labelledby="logoTitle logoDesc">
+<title id="logoTitle">Isabel Valenzuela Bienes Raíces</title>
+<desc id="logoDesc">Monograma IV con tejado geométrico, ventana, tres barras de crecimiento y una sola flecha ascendente dorada.</desc>
+<defs>
+  <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="80%">
+    <stop offset="0%" stop-color="#F4DFAF"/>
+    <stop offset="42%" stop-color="#DBB56F"/>
+    <stop offset="100%" stop-color="#B78439"/>
+  </linearGradient>
+  <linearGradient id="green" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#83C8A8"/>
+    <stop offset="1" stop-color="#247567"/>
+  </linearGradient>
+</defs>
+<g fill="none" stroke="url(#gold)" stroke-linejoin="miter" stroke-linecap="square">
+  <path d="M10 68 L97 12 L186 68" stroke-width="5"/>
+  <path d="M156 32 V20 H169 V55" stroke-width="4"/>
+</g>
+<g fill="url(#gold)">
+  <rect x="91" y="39" width="11" height="11"/>
+  <rect x="106" y="39" width="11" height="11"/>
+  <rect x="91" y="54" width="11" height="11"/>
+  <rect x="106" y="54" width="11" height="11"/>
+</g>
+<text x="14" y="150" fill="url(#gold)" font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="101" letter-spacing="-13">IV</text>
+<g fill="url(#green)">
+  <rect x="132" y="126" width="14" height="24"/>
+  <rect x="151" y="108" width="14" height="42"/>
+  <rect x="170" y="89" width="14" height="61"/>
+</g>
+<path d="M137 105 L157 89 L173 94 L202 53" fill="none" stroke="url(#gold)" stroke-linejoin="round" stroke-linecap="round" stroke-width="4.6"/>
+<path d="M202 53 L191 59 L200 67 Z" fill="url(#gold)"/>
+<path d="M225 29 V153" stroke="#CBA869" stroke-width="1" opacity=".65"/>
+<text x="247" y="77" fill="#F8F5EB" font-family="Georgia,'Times New Roman',serif" font-size="43" letter-spacing="4.5">ISABEL</text>
+<text x="247" y="122" fill="#F8F5EB" font-family="Georgia,'Times New Roman',serif" font-size="42" letter-spacing="2.5">VALENZUELA</text>
+<path d="M248 139 H650" stroke="url(#gold)" stroke-width="1.1" opacity=".8"/>
+<text x="249" y="160" fill="#D8B779" font-family="Arial,Helvetica,sans-serif" font-size="13.5" letter-spacing="7.7">BIENES RAÍCES</text>
 </svg>
