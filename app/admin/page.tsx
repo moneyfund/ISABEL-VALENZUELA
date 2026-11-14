@@ -70,7 +70,9 @@ export default function AdminPage() {
         }
         setGate("admin");
         unsubProperties = onSnapshot(collection(db!, "properties"), snapshot => {
-          setProperties(snapshot.docs.map(entry => ({ ...entry.data(), id: entry.id } as Property))
+          setProperties(snapshot.docs
+            .filter(entry => !entry.id.startsWith("demo-") && entry.data().demo !== true)
+            .map(entry => ({ ...entry.data(), id: entry.id } as Property))
             .sort((a, b) => b.createdAt - a.createdAt));
         }, () => setError("No se pudieron sincronizar las propiedades. Comprueba las reglas de Firestore."));
         unsubSite = onSnapshot(doc(db!, "site", "public"), snapshot => {
