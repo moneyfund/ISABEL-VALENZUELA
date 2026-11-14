@@ -11,7 +11,7 @@ export default function PropertyCard({ property, index = 0 }: { property: Proper
       <div className="iv-estate__image-wrap">
         <img src={cover} alt={property.title} loading="lazy" />
         <span className="iv-estate__tag">{property.category} · {property.operation}</span>
-        {property.demo && <span className="iv-estate__demo">DEMO</span>}
+        
         <span className="iv-estate__open"><ArrowUpRight size={22} /></span>
       </div>
       <div className="iv-estate__text">
