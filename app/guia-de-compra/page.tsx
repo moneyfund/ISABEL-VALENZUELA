@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { db } from "@/lib/firebase";
+import { submitGuideRequest } from "@/lib/guide-requests";
 import Link from "next/link";
 import {
   ArrowLeft, ArrowRight, ArrowUpRight, BadgeCheck, Check, CheckCircle2,
@@ -54,15 +56,22 @@ export default function PurchaseGuidePage() {
   const [answers, setAnswers] = useState<GuideAnswers>(initialAnswers);
   const [stage, setStage] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState("");
+  const [reference, setReference] = useState<string | null>(null);
   const result = buildPurchaseGuide(answers);
 
   function choose<K extends keyof GuideAnswers>(key: K, value: GuideAnswers[K]) {
     setAnswers(current => ({ ...current, [key]: value }));
     setCopied(false);
+    setSendError("");
   }
 
   const canNext = stage === 0
-    ? answers.payment !== null
+    ? answers.payment !== null && firstName.trim().length >= 2 && lastName.trim().length >= 2 && firstName.trim().length <= 60 && lastName.trim().length <= 60
     : stage === 1
       ? answers.property !== null && answers.documents !== null && answers.identified !== null
       : stage === 2
@@ -74,11 +83,33 @@ export default function PurchaseGuidePage() {
     : "Guía personalizada";
 
   const whatsapp = whatsappUrl(site.whatsapp,
-    `Hola Isabel, completé la guía de compra de tu página. Quisiera orientación sobre ${caseLabel.toLowerCase()}.`);
+    `Hola Isabel, soy ${firstName.trim()} ${lastName.trim()}. Completé la guía de compra sobre ${caseLabel.toLowerCase()}. Mi código de consulta es ${reference || "pendiente"}. Podés revisar mis respuestas en el panel de administración. Quisiera recibir orientación.`);
+
+  async function sendGuide() {
+    if (sending || !canNext || stage !== 2) return;
+    if (!db) {
+      setSendError("El sistema de consultas no está conectado. Intentá nuevamente o comunicate directamente con Isabel.");
+      return;
+    }
+    setSending(true);
+    setSendError("");
+    try {
+      const code = await submitGuideRequest(db, firstName, lastName, answers, consent);
+      setReference(code);
+      setStage(3);
+      window.scrollTo({ top: 230, behavior: "smooth" });
+    } catch (e) {
+      setSendError(e instanceof Error ? e.message : "No fue posible enviar la consulta. Probá nuevamente.");
+    } finally {
+      setSending(false);
+    }
+  }
 
   function summaryText() {
     return [
       "GUÍA ORIENTATIVA DE COMPRA DE PROPIEDAD | ISABEL VALENZUELA",
+      `Solicitante: ${firstName.trim()} ${lastName.trim()}`,
+      `Referencia: ${reference || "sin enviar"}`,
       caseLabel, "Nicaragua. Requisitos sujetos al caso y a revisión profesional.",
       "", "DOCUMENTOS DEL COMPRADOR",
       ...result.personal.map(item => "- " + item.text + (item.detail ? ": " + item.detail : "")),
@@ -103,6 +134,11 @@ export default function PurchaseGuidePage() {
   }
   function restart() {
     setAnswers(initialAnswers);
+    setFirstName("");
+    setLastName("");
+    setConsent(false);
+    setReference(null);
+    setSendError("");
     setStage(0);
     setCopied(false);
   }
@@ -115,7 +151,7 @@ export default function PurchaseGuidePage() {
           <p className="purchase-eyebrow"><span />GUÍA DE COMPRA EN NICARAGUA</p>
           <h1>Comprá con <em>más claridad.</em></h1>
           <p>Respondé unas preguntas y conocé qué revisar, qué documentos reunir y cuáles son los próximos pasos.</p>
-          <div className="purchase-hero__meta"><span><ShieldCheck size={17}/> Información orientativa</span><span><LockKeyhole size={17}/> No guardamos tus respuestas</span></div>
+          <div className="purchase-hero__meta"><span><ShieldCheck size={17}/> Información orientativa</span><span><LockKeyhole size={17}/> Envío privado y con tu autorización</span></div>
         </div>
         <div className="purchase-hero__seal" aria-hidden="true"><img src="/isabel-emblema.svg" alt=""/><span>DECISIONES INFORMADAS</span></div>
       </div>
@@ -128,7 +164,7 @@ export default function PurchaseGuidePage() {
           <ol className="purchase-progress">{stageNames.map((name, index) => <li key={name} className={index === stage ? "purchase-progress__active" : index < stage ? "purchase-progress__done" : ""}>
             <span>{index < stage ? <Check size={14}/> : String(index + 1).padStart(2, "0")}</span><div><strong>{name}</strong><small>{index < stage ? "Completado" : index === stage ? "Paso actual" : "Pendiente"}</small></div>
           </li>)}</ol>
-          <div className="purchase-sidebar__note"><ShieldCheck size={23}/><p>Esta herramienta no solicita cédulas, nombres, teléfonos ni documentos personales.</p></div>
+          <div className="purchase-sidebar__note"><ShieldCheck size={23}/><p>Esta guía guarda tu nombre y las opciones elegidas para que Isabel pueda atenderte sin repetir las preguntas.</p></div>
         </aside>
 
         <div className="purchase-main">
@@ -141,7 +177,14 @@ export default function PurchaseGuidePage() {
             </header>
 
             {stage === 0 && <div className="purchase-stage">
-              <ChoiceGrid items={paymentOptions} value={answers.payment} onChange={value => choose("payment", value)}/>
+              <div className="purchase-field">
+                <h3>¿Cómo te llamás?</h3>
+                <div className="purchase-name-row">
+                  <label><span>Nombre <b>*</b></span><input required autoComplete="given-name" maxLength={60} minLength={2} value={firstName} onChange={e => { setFirstName(e.target.value); setSendError(""); }} placeholder="Tu nombre"/></label>
+                  <label><span>Apellido <b>*</b></span><input required autoComplete="family-name" maxLength={60} minLength={2} value={lastName} onChange={e => { setLastName(e.target.value); setSendError(""); }} placeholder="Tu apellido"/></label>
+                </div>
+              </div>
+              <div className="purchase-field"><h3>Forma de pago</h3><ChoiceGrid items={paymentOptions} value={answers.payment} onChange={value => choose("payment", value)}/></div>
               <div className="purchase-tip"><BadgeCheck size={19}/> Sea con crédito o contado, siempre se debe revisar la situación jurídica del inmueble.</div>
             </div>}
 
@@ -163,13 +206,21 @@ export default function PurchaseGuidePage() {
                   {answers.payment === "credito" && <label><span>Ahorro para prima en USD</span><input type="number" min="0" max="100000000" step="any" inputMode="decimal" placeholder="Ej. 15000" value={answers.savings} onChange={e => choose("savings", e.target.value)}/></label>}
                 </div>
               </div>
-              <p className="purchase-privacy"><LockKeyhole size={16}/> Tus respuestas solo se utilizan en esta página. No se guardan en Firebase ni se comparten.</p>
+              <label className="purchase-consent">
+                <input type="checkbox" checked={consent} onChange={e => { setConsent(e.target.checked); setSendError(""); }} />
+                <span>Autorizo enviar y guardar mi nombre, apellido, selección de inmueble, forma de pago, ingresos, residencia y presupuesto (si lo indiqué) para que Isabel Valenzuela pueda revisar mi consulta y darle seguimiento por WhatsApp. Comprendo que será visible solamente para las dos cuentas administradoras autorizadas y que puedo solicitar su eliminación.</span>
+              </label>
+              <p className="purchase-privacy"><LockKeyhole size={16}/> La guía aparece cuando Firestore confirma el registro. No pedimos cédula ni datos bancarios.</p>
             </div>}
 
+            {sendError && <p className="purchase-submit-error" role="alert">{sendError}</p>}
             <footer className="purchase-panel-actions">
               {stage > 0 ? <button type="button" className="purchase-back" onClick={() => setStage(step => step - 1)}><ArrowLeft size={17}/> Anterior</button> : <Link href="/" className="purchase-back"><ArrowLeft size={17}/> Volver al inicio</Link>}
-              <button type="button" className="purchase-next" disabled={!canNext} onClick={() => { setStage(step => Math.min(3, step + 1)); window.scrollTo({ top: 230, behavior: "smooth" }); }}>
-                {stage === 2 ? "Ver mis requisitos" : "Continuar"} <ArrowRight size={18}/>
+              <button type="button" className="purchase-next" disabled={!canNext || sending || (stage === 2 && !consent)} onClick={() => {
+                if (stage === 2) { void sendGuide(); }
+                else { setStage(step => step + 1); window.scrollTo({ top: 230, behavior: "smooth" }); }
+              }}>
+                {stage === 2 ? (sending ? "Enviando consulta..." : "Enviar guía") : "Continuar"} <ArrowRight size={18}/>
               </button>
             </footer>
           </div> : <div className="purchase-results" aria-live="polite">
@@ -177,6 +228,7 @@ export default function PurchaseGuidePage() {
               <span><FileCheck2 size={17}/> RESULTADO PERSONALIZADO</span>
               <h2>Tu guía de compra</h2>
               <p>{caseLabel} en Nicaragua.</p>
+              <div className="purchase-reference"><CheckCircle2 size={18}/> ¡Consulta enviada! {firstName.trim()}, tu referencia es <strong>{reference}</strong>. Enviala por WhatsApp para que Isabel localice tus respuestas.</div>
               <div className="purchase-results__actions">
                 <button onClick={() => void copyResult()} type="button"><Copy size={17}/>{copied ? "Copiado" : "Copiar guía"}</button>
                 <button onClick={() => window.print()} type="button"><Printer size={17}/>Imprimir</button>
