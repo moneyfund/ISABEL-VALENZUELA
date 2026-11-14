@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import { getProperty, subscribeSite } from "@/lib/repository";
 import { defaultSite, type Property, type SiteContent } from "@/lib/models";
 import { contactLink, money, validImage } from "@/lib/format";
+import { categoryDetailsForDisplay, cleanedPropertyDetails, hasBathrooms, hasBedrooms, hasLandArea, propertyAreaLabel } from "@/lib/property-details";
 
 export default function PropertyDetail() {
   const params = useParams<{ id: string }>();
@@ -25,6 +26,10 @@ export default function PropertyDetail() {
   }, [params.id]);
   const images = property?.images?.filter(validImage) || [];
   const contact = property && !property.demo ? contactLink(site.whatsapp, site.email, property.title) : null;
+  const categoryFields = property ? categoryDetailsForDisplay(property) : [];
+  const details = property ? cleanedPropertyDetails(property.category, property.details) : {};
+  const extraFeatures = [...(details.features || []), ...(details.services || []), ...(property?.highlights || [])]
+    .filter((item, index, all) => item && all.indexOf(item) === index);
 
   return <main className="detail-page">
     <Navigation />
@@ -38,7 +43,16 @@ export default function PropertyDetail() {
           {images.length > 1 && <div className="detail-gallery__thumbs">{images.map((src, i) => <button className={i === imageIndex ? "active" : ""} key={src + i} onClick={() => setImageIndex(i)} aria-label={`Ver foto ${i + 1}`}><img src={src} alt={`Vista ${i + 1}`} /></button>)}</div>}
         </div>
         <div className="detail-page__columns">
-          <div className="detail-page__description"><p className="eyebrow eyebrow--dark">ACERCA DE LA PROPIEDAD</p><h2>Un espacio para lo que viene.</h2><p>{property.description}</p><h3>Características principales</h3><div className="detail-features"><span><Ruler size={22} />{property.area} m² de construcción / superficie</span>{property.landArea ? <span><Ruler size={22} />{property.landArea} m² de terreno</span> : null}{property.bedrooms > 0 && <span><BedDouble size={22} />{property.bedrooms} habitaciones</span>}{property.bathrooms > 0 && <span><Bath size={22} />{property.bathrooms} baños</span>}</div>{property.highlights.length > 0 && <div className="detail-highlights">{property.highlights.map(h => <span key={h}><CheckCircle2 size={17} /> {h}</span>)}</div>}</div>
+          <div className="detail-page__description"><p className="eyebrow eyebrow--dark">ACERCA DE LA PROPIEDAD</p><h2>Un espacio para lo que viene.</h2><p>{property.description}</p><h3>Características principales</h3><div className="detail-features">
+            <span><Ruler size={22} />Superficie: {propertyAreaLabel(property)}</span>
+            {hasLandArea(property.category) && !!property.landArea && <span><Ruler size={22} />Terreno: {property.landArea.toLocaleString("es-NI")} m²</span>}
+            {hasBedrooms(property.category) && property.bedrooms > 0 && <span><BedDouble size={22} />{property.bedrooms} habitaciones</span>}
+            {hasBathrooms(property.category) && property.bathrooms > 0 && <span><Bath size={22} />{property.bathrooms} baños</span>}
+            {categoryFields.map(({label,value}) => <span key={label}><CheckCircle2 size={22} />{label}: {value}</span>)}
+          </div>
+          {extraFeatures.length > 0 && <div className="detail-highlights">
+            {extraFeatures.map(item => <span key={item}><CheckCircle2 size={17}/> {item}</span>)}
+          </div>}</div>
           <aside className="detail-page__aside"><p className="eyebrow eyebrow--gold">AGENDA UNA CONVERSACIÓN</p><h3>¿Es este tu próximo espacio?</h3><p>Conoce los detalles, consulta disponibilidad y recibe acompañamiento durante el proceso.</p>{contact ? <a className="btn btn--gold" target={contact.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" href={contact}>Solicitar información <ArrowUpRight size={17} /></a> : <span className="aside-pending">{property.demo ? "Ficha ilustrativa · no disponible para consultas" : "Contacto pendiente de configurar"}</span>}</aside>
         </div>
       </>}
