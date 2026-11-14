@@ -3,10 +3,10 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { getIdTokenResult, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, type User } from "firebase/auth";
-import { collection, deleteDoc, doc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, onSnapshot, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import {
-  ArrowLeft, ArrowUpRight, Building2, CheckCircle2, CloudUpload, FilePenLine,
+  ArrowLeft, ArrowUpRight, Bell, Building2, CheckCircle2, ClipboardList, CloudUpload, FilePenLine,
   Globe2, ImagePlus, LayoutDashboard, LogOut, Plus, Save, ShieldAlert, Trash2, X
 } from "lucide-react";
 import { auth, db, firebaseReady, storage } from "@/lib/firebase";
@@ -43,16 +43,20 @@ export default function AdminPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState("");
+  const [newGuidesCount, setNewGuidesCount] = useState<number | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (!auth || !db) return;
     let unsubProperties: (() => void) | undefined;
     let unsubSite: (() => void) | undefined;
+    let unsubGuides: (() => void) | undefined;
     let active = true;
     const stopAuth = onAuthStateChanged(auth, async signedIn => {
-      unsubProperties?.(); unsubSite?.();
+      unsubProperties?.(); unsubSite?.(); unsubGuides?.();
+      unsubProperties = undefined; unsubSite = undefined; unsubGuides = undefined;
       if (!active) return;
+      setNewGuidesCount(null);
       setUser(signedIn);
       setGate(signedIn ? "checking" : "guest");
       if (!signedIn) return;
@@ -69,6 +73,16 @@ export default function AdminPage() {
           return;
         }
         setGate("admin");
+        // Independent listener: the nav counter updates on submissions, status changes,
+        // or deletions without needing to open the Guías recibidas section.
+        unsubGuides = onSnapshot(
+          query(collection(db!, "purchase_requests"), where("status", "==", "nuevo")),
+          snapshot => setNewGuidesCount(snapshot.size),
+          () => {
+            setNewGuidesCount(null);
+            setError("No fue posible cargar el contador de guías nuevas. Verificá las reglas de Firestore.");
+          }
+        );
         unsubProperties = onSnapshot(collection(db!, "properties"), snapshot => {
           setProperties(snapshot.docs
             .filter(entry => !entry.id.startsWith("demo-") && entry.data().demo !== true)
@@ -82,7 +96,7 @@ export default function AdminPage() {
         if (active) { setGate("denied"); setError("No fue posible verificar los permisos de esta cuenta."); }
       }
     });
-    return () => { active = false; stopAuth(); unsubProperties?.(); unsubSite?.(); };
+    return () => { active = false; stopAuth(); unsubProperties?.(); unsubSite?.(); unsubGuides?.(); };
   }, []);
 
 
@@ -253,12 +267,23 @@ export default function AdminPage() {
       <button className={tab === "overview" ? "selected" : ""} onClick={() => {setTab("overview"); setEditing(false);}}><LayoutDashboard size={18}/> Resumen</button>
       <button className={tab === "properties" ? "selected" : ""} onClick={() => {setTab("properties"); setEditing(false);}}><Building2 size={18}/> Propiedades</button>
       <button className={tab === "content" ? "selected" : ""} onClick={() => {setTab("content"); setEditing(false);}}><FilePenLine size={18}/> Contenido web</button>
-      <button className={tab === "requests" ? "selected" : ""} onClick={() => {setTab("requests"); setEditing(false);}}><FilePenLine size={18}/> Guías recibidas</button>
+      <button className={tab === "requests" ? "selected" : ""} onClick={() => {setTab("requests"); setEditing(false);}}
+        aria-label={newGuidesCount ? `Guías recibidas, ${newGuidesCount} solicitudes nuevas` : "Guías recibidas"}>
+        <ClipboardList size={18}/> Guías recibidas
+        {newGuidesCount !== null && newGuidesCount > 0 &&
+          <span className="admin-guides-badge" aria-label={`${newGuidesCount} nuevas`}>
+            <Bell size={12} aria-hidden="true"/>{newGuidesCount}
+          </span>}
+      </button>
       <div className="admin__sidebar-bottom"><Link href="/" target="_blank"><Globe2 size={18}/> Ver sitio público <ArrowUpRight size={15}/></Link><button onClick={() => auth && signOut(auth)}><LogOut size={18}/> Cerrar sesión</button></div>
     </aside>
     <div className="admin__workspace">
       <header className="admin__top"><div><span className="admin__mobile-label">ISABEL VALENZUELA · PANEL</span><p>GESTIÓN INMOBILIARIA</p><h1>{tab === "overview" ? "Panel general" : tab === "properties" ? "Propiedades" : tab === "requests" ? "Guías recibidas" : "Contenido del sitio"}</h1></div><div className="admin__user"><span>{user?.displayName || user?.email}</span>{user?.photoURL ? <img src={user.photoURL} width={36} height={36} alt="" /> : <span className="admin__avatar">IV</span>}</div></header>
-      <nav className="admin__mobile-nav" aria-label="Opciones del panel"><button onClick={() => {setTab("overview"); setEditing(false);}}>Resumen</button><button onClick={() => {setTab("properties"); setEditing(false);}}>Propiedades</button><button onClick={() => {setTab("content"); setEditing(false);}}>Contenido</button><button onClick={() => {setTab("requests"); setEditing(false);}}>Consultas</button><button onClick={() => auth && signOut(auth)}>Salir</button></nav>
+      <nav className="admin__mobile-nav" aria-label="Opciones del panel"><button onClick={() => {setTab("overview"); setEditing(false);}}>Resumen</button><button onClick={() => {setTab("properties"); setEditing(false);}}>Propiedades</button><button onClick={() => {setTab("content"); setEditing(false);}}>Contenido</button><button onClick={() => {setTab("requests"); setEditing(false);}}
+          aria-label={newGuidesCount ? `Guías recibidas, ${newGuidesCount} solicitudes nuevas` : "Guías recibidas"}>
+          Guías
+          {newGuidesCount !== null && newGuidesCount > 0 && <span className="admin-guides-badge admin-guides-badge--mobile" aria-label={`${newGuidesCount} nuevas`}><Bell size={12} aria-hidden="true"/>{newGuidesCount}</span>}
+        </button><button onClick={() => auth && signOut(auth)}>Salir</button></nav>
       {error && <div className="admin-message admin-message--error" role="alert">{error} <button onClick={() => setError("")}><X size={15}/></button></div>}
       {notice && <div className="admin-message admin-message--success" role="status"><CheckCircle2 size={17}/>{notice}<button onClick={() => setNotice("")}><X size={15}/></button></div>}
 
