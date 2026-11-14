@@ -107,3 +107,28 @@ público podría recibir spam. Antes de campañas de alto tráfico, habilitar Fi
 Check o un endpoint protegido con verificación antispam, y definir una política de
 retención/eliminación de solicitudes. No se solicitan cédulas, contraseñas ni cuentas
 bancarias. No se almacena automáticamente el número del remitente de WhatsApp.
+
+## Celular del solicitante y retirada de propiedades DEMO (13 nov 2026)
+
+- La primera pantalla de `/guia-de-compra` ahora solicita **nombre, apellido y número celular**.
+  Acepta números nicaragüenses de 8 dígitos (se les agrega `+505`) y números internacionales con prefijo.
+  El teléfono se guarda en `purchase_requests.phone` junto al resto de respuestas y el consentimiento
+  expreso de seguimiento por **llamada o WhatsApp**. El administrador lo ve en
+  **Guías recibidas** y puede pulsarlo para llamar. Consultas previas sin `phone` se mantienen legibles.
+- **Acción de Firebase obligatoria:** sustituir y publicar las reglas de Firestore con el archivo
+  completo `firestore.rules`. La versión anterior en el repositorio contenía un fragmento
+  malformado; ahora se reparó. El nuevo esquema de envío exige `phone` y solo admite
+  que un visitante cree la consulta; nunca puede leerla, modificarla o eliminarla.
+  Storage no requiere actualización.
+- En `/admin` → **Propiedades** → **Propiedades DEMO** aparece una lista de las 6 fichas
+  locales. `Quitar` guarda su ID mediante `arrayUnion` en `site/public.hiddenDemoIds` y
+  elimina su presencia del catálogo y del enlace directo. `Restaurar` hace `arrayRemove`.
+  No se borran anuncios reales de Firestore. Es una baja persistente del ejemplo; el
+  archivo fuente de las 6 fichas sigue disponible en `lib/demo.ts`.
+- El catálogo público escucha el documento de configuración y los anuncios publicados;
+  si no hay reales, solo presenta demos aún habilitadas. **Si se retiran todas, el catálogo
+  queda vacío en lugar de volver a publicar demos automáticamente.**
+
+Las pruebas de interfaz necesitan Firebase Authentication, Firestore y reglas publicadas
+antes de efectuar una solicitud real de prueba. Las verificaciones CI no sustituyen ese
+paso ni realizan un envío de datos de un usuario.
