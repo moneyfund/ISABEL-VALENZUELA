@@ -16,6 +16,9 @@ import { contactEmail, safeSocialUrl, whatsappUrl } from "@/lib/social";
 import SocialLinks from "@/components/SocialLinks";
 import { isAllowedAdminEmail } from "@/lib/admin-access";
 import GuideRequestsPanel from "@/components/admin/GuideRequestsPanel";
+import CategoryFields from "@/components/admin/CategoryFields";
+import { cleanedPropertyDetails, hasAreaUnitSelector, hasBedrooms, hasBathrooms, hasLandArea, propertyCategoryInfo } from "@/lib/property-details";
+import "./property-form.css";
 import "./admin-requests.css";
 
 type Gate = "checking" | "setup" | "guest" | "denied" | "admin";
@@ -23,7 +26,7 @@ type Tab = "overview" | "properties" | "content" | "requests";
 
 const emptyProperty = (): Property => ({
   id: "", title: "", category: "Casa", operation: "Venta", city: "",
-  location: "", price: 0, area: 0, bedrooms: 0, bathrooms: 0,
+  location: "", price: 0, area: 0, areaUnit: "m2", bedrooms: 0, bathrooms: 0, details: {},
   images: [], description: "", highlights: [], featured: false, published: false,
   createdAt: Date.now()
 });
@@ -88,6 +91,20 @@ export default function AdminPage() {
   const flash = (message: string) => { setNotice(message); setError(""); };
   const change = <K extends keyof Property>(key: K, value: Property[K]) =>
     setForm(previous => ({ ...previous, [key]: value }));
+  function changeCategory(category: PropertyCategory) {
+    setForm(previous => previous.category === category ? previous : ({
+      ...previous,
+      category,
+      area: 0,
+      areaUnit: category === "Finca" ? "mz" : "m2",
+      bedrooms: 0,
+      bathrooms: 0,
+      landArea: undefined,
+      details: {}
+    }));
+    setError("");
+  }
+
   const siteChange = <K extends keyof SiteContent>(key: K, value: SiteContent[K]) =>
     setSite(previous => ({ ...previous, [key]: value }));
 
@@ -131,8 +148,11 @@ export default function AdminPage() {
         images: [...form.images.filter(validImage), ...uploaded],
         highlights: form.highlights.filter(Boolean),
         price: Math.max(0, Number(form.price) || 0), area: Math.max(0, Number(form.area) || 0),
-        bedrooms: Math.max(0, Number(form.bedrooms) || 0), bathrooms: Math.max(0, Number(form.bathrooms) || 0),
-        landArea: Math.max(0, Number(form.landArea) || 0),
+        bedrooms: hasBedrooms(form.category) ? Math.max(0, Number(form.bedrooms) || 0) : 0,
+        bathrooms: hasBathrooms(form.category) ? Math.max(0, Number(form.bathrooms) || 0) : 0,
+        landArea: hasLandArea(form.category) ? Math.max(0, Number(form.landArea) || 0) : 0,
+        areaUnit: hasAreaUnitSelector(form.category) && form.areaUnit === "mz" ? "mz" : "m2",
+        details: cleanedPropertyDetails(form.category, form.details),
         createdAt: form.createdAt || Date.now(), demo: false
       };
       await setDoc(doc(db, "properties", id), payload);
@@ -251,18 +271,19 @@ export default function AdminPage() {
           <form onSubmit={saveProperty} className="admin-form">
             <div className="admin-panel"><h3>Información principal</h3><div className="form-grid">
               <label className="span-2">Nombre de la propiedad <input required value={form.title} onChange={e => change("title", e.target.value)} placeholder="Ej. Residencia contemporánea en Matagalpa"/></label>
-              <label>Tipo de propiedad <select value={form.category} onChange={e => change("category", e.target.value as PropertyCategory)}>{["Casa","Apartamento","Terreno","Finca","Comercial"].map(x => <option key={x}>{x}</option>)}</select></label>
+              <label>Tipo de propiedad <select value={form.category} onChange={e => changeCategory(e.target.value as PropertyCategory)}>{["Casa","Apartamento","Terreno","Finca","Comercial"].map(x => <option key={x}>{x}</option>)}</select></label>
               <label>Operación <select value={form.operation} onChange={e => change("operation", e.target.value as Operation)}><option>Venta</option><option>Alquiler</option></select></label>
               <label>Ciudad <input required value={form.city} onChange={e => change("city", e.target.value)} placeholder="Matagalpa"/></label>
               <label>Ubicación / sector <input required value={form.location} onChange={e => change("location", e.target.value)} placeholder="Sector, ciudad, departamento"/></label>
               <label>Precio (USD) <input type="number" min={0} step="any" value={form.price} onChange={e => change("price", Number(e.target.value))}/></label>
-              <label>Superficie (m²) <input required type="number" min={1} step="any" value={form.area || ""} onChange={e => change("area", Number(e.target.value))}/></label>
-              <label>Terreno (m², opcional) <input type="number" min={0} step="any" value={form.landArea || ""} onChange={e => change("landArea", Number(e.target.value))}/></label>
-              <label>Habitaciones <input type="number" min={0} value={form.bedrooms} onChange={e => change("bedrooms", Number(e.target.value))}/></label>
-              <label>Baños <input type="number" min={0} value={form.bathrooms} onChange={e => change("bathrooms", Number(e.target.value))}/></label>
+              <label>{propertyCategoryInfo[form.category].areaLabel} ({form.areaUnit === "mz" ? "manzanas" : "m²"}) <input required type="number" min={0.01} step="any" value={form.area || ""} placeholder={form.areaUnit === "mz" ? "Ej. 12.5" : "Ej. 250"} onChange={e => change("area", Number(e.target.value))}/></label>
+              {hasAreaUnitSelector(form.category) && <label>Unidad de superficie <select value={form.areaUnit === "mz" ? "mz" : "m2"} onChange={e => change("areaUnit", e.target.value as "m2" | "mz")}><option value="m2">Metros cuadrados (m²)</option><option value="mz">Manzanas (mz)</option></select></label>}
               <label className="span-2">Descripción <textarea required rows={5} value={form.description} onChange={e => change("description", e.target.value)} placeholder="Describe las características reales de esta propiedad..."/></label>
               <label className="span-2">Atributos destacados (separados por comas) <input value={form.highlights.join(", ")} onChange={e => change("highlights", e.target.value.split(",").map(s => s.trim()))} placeholder="Terraza, Jardín, Estacionamiento"/></label>
-            </div></div>
+            </div>
+              <p className="admin-category-panel__note">Al cambiar el tipo de propiedad se reinician únicamente las medidas y características específicas. El título, la ubicación, el precio, la descripción y las fotografías se conservan.</p>
+            </div>
+            <CategoryFields property={form} onUpdate={patch => setForm(previous => ({ ...previous, ...patch }))} />
             <div className="admin-panel"><h3>Galería fotográfica</h3><p className="admin-hint">Sube varias imágenes JPEG, PNG o WebP a Firebase Storage. Máximo 8 MB por foto.</p><label className="upload-zone"><CloudUpload size={30}/><strong>Seleccionar imágenes</strong><span>{files.length ? `${files.length} archivo(s) seleccionado(s)` : "Arrastra o selecciona imágenes desde tu equipo"}</span><input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={e => setFiles(Array.from(e.target.files || []))}/></label>
               {form.images.length > 0 && <div className="image-editor">{form.images.map((url, i) => <div key={url + i}><img src={url} alt={`Imagen ${i+1}`}/><button type="button" title="Quitar de esta publicación" onClick={() => change("images", form.images.filter((_, n) => n !== i))}><X size={16}/></button></div>)}</div>}
               <label className="admin-url-label">También puedes añadir URLs HTTPS de imágenes (una por línea)<textarea rows={3} value={form.images.join("\n")} onChange={e => change("images", e.target.value.split("\n").map(s => s.trim()).filter(Boolean))} placeholder="https://..."/></label>

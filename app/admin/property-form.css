@@ -1,0 +1,23 @@
+/* Adaptative property listing fields: petrol, cream and warm gold. */
+.admin-category-panel {border-color:#e0e8e0; background:linear-gradient(165deg,#fff 0%,#fcfdfb 100%);}
+.admin-category-panel__header {display:flex;gap:18px;align-items:start;justify-content:space-between;border-bottom:1px solid #e8ece5;margin-bottom:25px;padding-bottom:22px;}
+.admin-category-panel__header p {font-size:9px;color:#ae8850;font-weight:700;letter-spacing:.16em;margin:0 0 9px;}
+.admin-category-panel__header h3 {margin:0 0 7px!important;color:#133a3d;font-size:20px;font-weight:600;}
+.admin-category-panel__header span:not(.admin-category-panel__tag) {display:block;font-size:12px;font-weight:400;color:#788a81;line-height:1.7;}
+.admin-category-panel__tag {background:#0b3037;color:#eed4a8;font-size:10px;font-weight:600;padding:8px 13px;white-space:nowrap;}
+.admin-category-panel__fields {padding-bottom:12px;}
+.admin-field-hint {font-size:10px;font-weight:400;color:#87918d;line-height:1.5;}
+.admin-category-panel__checklist {border:none;border-top:1px solid #e9eee7;padding:22px 0 0;margin:20px 0 0;}
+.admin-category-panel__checklist legend {font-size:12px;font-weight:700;color:#37544b;padding:0 10px 0 0;}
+.admin-category-panel__options {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px 14px;margin-top:5px;}
+.admin-category-panel__options label {display:flex;align-items:center;gap:10px;min-height:45px;padding:10px 11px;border:1px solid #e2e9e2;background:#f9fbf8;font-size:11px;line-height:1.45;font-weight:500;color:#496158;cursor:pointer;transition:background .2s,border-color .2s;}
+.admin-category-panel__options label:hover {background:#f5f2eb;border-color:#d4b88e;}
+.admin-category-panel__options input {width:16px;height:16px;accent-color:#0b3037;flex-shrink:0;cursor:pointer;}
+.admin-category-panel__footnote,.admin-category-panel__note {color:#82918a;font-size:11px;line-height:1.8;margin:23px 0 0;}
+.admin-category-panel__note {margin-top:20px;background:#f7f9f6;border-left:2px solid #d3b076;padding:12px 15px;}
+@media(max-width:1050px) {.admin-category-panel__options {grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:620px) {
+  .admin-category-panel__header {display:block;}
+  .admin-category-panel__tag {display:inline-block;margin-top:14px;}
+  .admin-category-panel__options {grid-template-columns:1fr;}
+}
