@@ -3,13 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   CheckCircle2, ClipboardList, Clock3, Eye, Search, Trash2,
-  MessageCircle, AlertTriangle, X
+  MessageCircle, AlertTriangle, Phone, X
 } from "lucide-react";
 import { collection, deleteDoc, doc, limit, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import {
   type GuideRequestRecord, type GuideRequestStatus, guideLabels,
-  guideReference, localDateTime, requestStatuses
+  guideReference, localDateTime, normalizeGuidePhone, requestStatuses
 } from "@/lib/guide-requests";
 
 type Filter = "todas" | GuideRequestStatus;
@@ -39,7 +39,7 @@ export default function GuideRequestsPanel() {
   const filtered = useMemo(() => {
     const q = term.trim().toLocaleLowerCase("es");
     return requests.filter(item => {
-      const text = [item.firstName, item.lastName, guideReference(item.id),
+      const text = [item.firstName, item.lastName, item.phone || "", guideReference(item.id),
         guideLabels.payment[item.payment], guideLabels.property[item.property]].join(" ").toLocaleLowerCase("es");
       return (filter === "todas" || item.status === filter) && (!q || text.includes(q));
     });
@@ -96,6 +96,7 @@ export default function GuideRequestsPanel() {
             <span className="guide-inbox__ref">{guideReference(item.id)}</span>
             <h3>{item.firstName} {item.lastName}</h3>
             <p><Clock3 size={14}/>{localDateTime(item.createdAt)}</p>
+            {item.phone && <a className="guide-inbox__phone" href={`tel:${normalizeGuidePhone(item.phone) || item.phone}`}><Phone size={14}/>{item.phone}</a>}
           </div>
           <div className="guide-inbox__summary">
             <span>{guideLabels.payment[item.payment]} · {guideLabels.property[item.property]}</span>
@@ -116,6 +117,7 @@ export default function GuideRequestsPanel() {
           </div>
         </div>
         {selected === item.id && <div className="guide-inbox__detail">
+          <div><span>Celular de contacto</span><strong>{item.phone ? <a className="guide-inbox__phone-link" href={`tel:${normalizeGuidePhone(item.phone) || item.phone}`}><Phone size={15}/>{item.phone} · Llamar</a> : "No registrado (consulta anterior)"}</strong></div>
           <div><span>Forma de pago</span><strong>{guideLabels.payment[item.payment]}</strong></div>
           <div><span>Propiedad</span><strong>{guideLabels.property[item.property]}</strong></div>
           <div><span>Tipo de ingresos</span><strong>{guideLabels.income[item.income]}</strong></div>
