@@ -45,7 +45,6 @@ export default function GuideRequestsPanel() {
     });
   }, [requests, term, filter]);
 
-  const focus = requests.find(item => item.id === selected);
   const newCount = requests.filter(item => item.status === "nuevo").length;
 
   async function changeStatus(item: GuideRequestRecord, status: GuideRequestStatus) {
