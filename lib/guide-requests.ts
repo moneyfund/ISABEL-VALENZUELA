@@ -1,4 +1,5 @@
 import { collection, doc, serverTimestamp, setDoc, type Firestore, type Timestamp } from "firebase/firestore";
+import { normalizedServiceAnswers, type ServiceAnswers, type ServiceGuideType } from "@/lib/guia-servicios";
 import type {
   GuideAnswers, PaymentMode, PropertyType, IncomeType, ResidenceType, PropertyDocuments
 } from "@/lib/guia-compra";
@@ -128,4 +129,58 @@ export function localDateTime(value?: Timestamp) {
     dateStyle: "medium",
     timeStyle: "short"
   }).format(value.toDate());
+}
+
+/** New guide variants share the private purchase_requests inbox, preserving
+ * historical purchase requests without schema migration. */
+export interface ServiceGuideRequestRecord {
+  id: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  guideType: ServiceGuideType;
+  answers: Record<string, string | number | null>;
+  consent: true;
+  status: GuideRequestStatus;
+  createdAt?: Timestamp;
+}
+
+export type AnyGuideRequest = GuideRequestRecord | ServiceGuideRequestRecord;
+
+export function isServiceGuideRequest(value: AnyGuideRequest): value is ServiceGuideRequestRecord {
+  return "guideType" in value
+    && (value.guideType === "venta" || value.guideType === "buscar-renta" || value.guideType === "ofrecer-renta");
+}
+
+export async function submitServiceGuideRequest(
+  firestore: Firestore,
+  guideType: ServiceGuideType,
+  firstName: string,
+  lastName: string,
+  phone: string,
+  answers: ServiceAnswers,
+  consent: boolean
+): Promise<string> {
+  const name = firstName.trim().replace(/\s+/g," ");
+  const surname = lastName.trim().replace(/\s+/g," ");
+  if (name.length < 2 || name.length > 60 || surname.length < 2 || surname.length > 60
+    || !/^[^<>\r\n]+$/.test(name) || !/^[^<>\r\n]+$/.test(surname)) {
+    throw new Error("Ingresá un nombre y apellido válidos.");
+  }
+  const validatedPhone = normalizeGuidePhone(phone);
+  if (!validatedPhone) throw new Error("Ingresá un celular válido.");
+  if (!consent) throw new Error("Necesitamos tu autorización para guardar la solicitud y contactarte.");
+  const cleanAnswers = normalizedServiceAnswers(guideType, answers);
+  const reference = doc(collection(firestore, "purchase_requests"));
+  await setDoc(reference, {
+    firstName:name,
+    lastName:surname,
+    phone:validatedPhone,
+    guideType,
+    answers:cleanAnswers,
+    consent:true,
+    status:"nuevo",
+    createdAt:serverTimestamp()
+  });
+  return guideReference(reference.id);
 }

@@ -17,7 +17,7 @@ export default function Footer({ site }: { site: SiteContent }) {
       <nav aria-label="Enlaces del pie de página" className="iv-footer__nav">
         <Link href="/">Inicio</Link>
         <Link href="/propiedades">Propiedades</Link>
-        <Link href="/guia-de-compra">Guía de compra</Link>
+        <Link href="/guias">Guías</Link>
         <Link href="/servicios">Servicios</Link>
         <Link href="/sobre-isabel">Sobre Isabel</Link>
         <Link href="/contacto">Contacto</Link>

@@ -1,0 +1,58 @@
+/* Isabel Valenzuela — Guia hub, purpose-led editorial navigation */
+.guides-index { background:#f7f5ef;color:#10343a; }
+.guides-index__hero {padding:174px 0 83px;background:#0b3037;color:#fff;position:relative;overflow:hidden;}
+.guides-index__hero::before{content:"";position:absolute;width:600px;height:600px;border:1px solid rgba(216,179,111,.18);border-radius:50%;right:-200px;top:-100px;box-shadow:0 0 0 108px rgba(216,179,111,.03),0 0 0 225px rgba(216,179,111,.015);pointer-events:none;}
+.guides-index__hero .container{position:relative;z-index:1;}
+.guides-index__eyebrow{display:flex;align-items:center;gap:13px;letter-spacing:.19em;font-weight:600;font-size:10px;color:#d6b476;margin:0 0 24px;}
+.guides-index__eyebrow span{width:29px;height:2px;background:#d6b476;}
+.guides-index__hero h1{font-family:"Source Serif 4",Georgia,serif;font-size:clamp(48px,6vw,81px);font-weight:400;line-height:1.1;letter-spacing:-.05em;margin:0 0 21px;max-width:850px;text-wrap:balance;}
+.guides-index__hero h1 em{font-weight:400;font-style:normal;color:#dfbf8c;}
+.guides-index__hero p:not(.guides-index__eyebrow){font-family:"Poppins",sans-serif;font-size:14px;line-height:1.85;max-width:640px;color:#c9d9d6;margin:0;}
+.guides-index__assurance{display:inline-flex;align-items:center;gap:9px;font-size:11px;color:#d9e3de;border-top:1px solid rgba(255,255,255,.17);margin-top:32px;padding-top:17px;}
+.guides-index__assurance svg{color:#d5b57b;}
+.guides-index__selection{padding:78px 0 100px;}
+.guides-index__heading{display:flex;align-items:end;justify-content:space-between;gap:40px;margin:0 0 35px;}
+.guides-index__heading span{font-size:10px;letter-spacing:.17em;color:#a67b42;font-weight:600;}
+.guides-index__heading h2{font-family:"Source Serif 4",Georgia,serif;font-size:clamp(33px,3.5vw,50px);font-weight:500;letter-spacing:-.04em;line-height:1.2;margin:13px 0 0;}
+.guides-index__heading p{font-size:12px;line-height:1.8;color:#7a8780;max-width:350px;margin:0;}
+.guides-index__cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;}
+.guides-index__card{background:#fff;border:1px solid #e4e5de;min-height:335px;padding:29px 33px;display:flex;flex-direction:column;position:relative;overflow:hidden;transition:transform .3s ease,border-color .3s ease,box-shadow .3s ease;}
+.guides-index__card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:#d2ad71;transform:scaleY(0);transform-origin:top;transition:transform .3s ease;}
+.guides-index__card:hover{transform:translateY(-5px);border-color:#d2b68a;box-shadow:0 24px 44px rgba(17,49,51,.09);}
+.guides-index__card:hover::before{transform:scaleY(1);}
+.guides-index__card-head{display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.guides-index__card-head span{font-size:10px;color:#92734a;font-weight:600;letter-spacing:.13em;}
+.guides-index__card-head svg{color:#a88859;}
+.guides-index__icon{margin:29px 0 25px;width:69px;height:69px;display:grid;place-items:center;background:#edf3ef;color:#0b4043;}
+.guides-index__card:nth-child(2) .guides-index__icon,.guides-index__card:nth-child(4) .guides-index__icon{background:#f6f0e6;color:#9d794b;}
+.guides-index__card-foot{margin-top:auto;}
+.guides-index__card h3{font-family:"Source Serif 4",Georgia,serif;font-size:clamp(26px,2.7vw,39px);font-weight:500;color:#0c3339;letter-spacing:-.045em;margin:0 0 10px;}
+.guides-index__card p{font-family:"Poppins",sans-serif;color:#788680;font-size:12px;line-height:1.75;margin:0;max-width:440px;}
+.guides-index__card-foot>span{margin-top:20px;display:inline-flex;align-items:center;gap:10px;font-size:11px;font-weight:600;color:#0a383e;border-bottom:1px solid #b8955f;padding-bottom:5px;}
+.guides-index__privacy{display:flex;align-items:center;gap:11px;margin:31px 0 0;color:#76877e;font-size:11px;line-height:1.8;}
+.guides-index__privacy svg{flex-shrink:0;color:#6d9b83;}
+.guide-subhero{padding:154px 0 69px;}
+.guide-back-link{display:inline-flex;align-items:center;gap:8px;color:#8b6d45;font-size:12px;font-weight:600;margin-bottom:22px;border-bottom:1px solid #ceb994;padding-bottom:6px;}
+.guide-fields__choices{grid-template-columns:repeat(3,minmax(0,1fr));}
+.guide-fields__choices .purchase-choice{min-height:98px;padding:15px;}
+.guide-fields__input input{min-height:52px;width:100%;border:1px solid #dfe5dc;background:#fafbf8;padding:13px 16px;color:#133c41;font-family:"Poppins",Arial,sans-serif;font-size:13px;outline-color:#bd9663;}
+.guide-fields__input small{display:block;margin-top:10px;font-size:11px;color:#7d897e;line-height:1.6;}
+@media(max-width:950px) {
+  .guides-index__card{padding:25px;min-height:310px;}
+  .guides-index__heading{align-items:start;flex-direction:column;gap:14px;}
+  .guide-fields__choices{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media(max-width:680px){
+  .guides-index__hero{padding:115px 0 63px;}
+  .guides-index__hero h1{font-size:clamp(43px,10vw,62px);}
+  .guides-index__hero p:not(.guides-index__eyebrow){font-size:12px;}
+  .guides-index__selection{padding:52px 0 65px;}
+  .guides-index__cards{grid-template-columns:1fr;gap:14px;}
+  .guides-index__card{min-height:273px;padding:25px;}
+  .guides-index__icon{margin:23px 0 17px;width:58px;height:58px;}
+  .guides-index__card h3{font-size:32px;}
+  .guides-index__privacy{align-items:start;}
+  .guide-subhero{padding:116px 0 55px;}
+  .guide-fields__choices{grid-template-columns:1fr;}
+}
+@media(prefers-reduced-motion:reduce){.guides-index__card,.guides-index__card::before{transition:none;}}

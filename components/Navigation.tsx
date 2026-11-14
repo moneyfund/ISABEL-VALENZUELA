@@ -9,7 +9,7 @@ import Brand from "./Brand";
 const pages = [
   { title: "Inicio", href: "/" },
   { title: "Propiedades", href: "/propiedades" },
-  { title: "Guía de compra", href: "/guia-de-compra" },
+  { title: "Guías", href: "/guias" },
   { title: "Servicios", href: "/servicios" },
   { title: "Sobre Isabel", href: "/sobre-isabel" },
   { title: "Contacto", href: "/contacto" }
@@ -36,7 +36,7 @@ export default function Navigation() {
       <nav className={`nav__links ${open ? "nav__links--open" : ""}`} aria-label="Navegación principal">
         {pages.map(page => <Link key={page.href} href={page.href}
           onClick={() => setOpen(false)}
-          className={`${pathname === page.href || (page.href === "/propiedades" && pathname.startsWith("/propiedades/")) ? "nav__active" : ""} ${page.href === "/contacto" ? "nav__contact" : ""}`}>
+          className={`${pathname === page.href || (page.href === "/propiedades" && pathname.startsWith("/propiedades/")) || (page.href === "/guias" && (pathname.startsWith("/guias/") || pathname === "/guia-de-compra")) ? "nav__active" : ""} ${page.href === "/contacto" ? "nav__contact" : ""}`}>
           {page.title}{page.href === "/contacto" && <ArrowUpRight size={15} />}
         </Link>)}
       </nav>

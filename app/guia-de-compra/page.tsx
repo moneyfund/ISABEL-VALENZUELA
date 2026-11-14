@@ -219,7 +219,7 @@ export default function PurchaseGuidePage() {
 
             {sendError && <p className="purchase-submit-error" role="alert">{sendError}</p>}
             <footer className="purchase-panel-actions">
-              {stage > 0 ? <button type="button" className="purchase-back" onClick={() => setStage(step => step - 1)}><ArrowLeft size={17}/> Anterior</button> : <Link href="/" className="purchase-back"><ArrowLeft size={17}/> Volver al inicio</Link>}
+              {stage > 0 ? <button type="button" className="purchase-back" onClick={() => setStage(step => step - 1)}><ArrowLeft size={17}/> Anterior</button> : <Link href="/guias" className="purchase-back"><ArrowLeft size={17}/> Ver guías</Link>}
               <button type="button" className="purchase-next" disabled={!canNext || sending || (stage === 2 && !consent)} onClick={() => {
                 if (stage === 2) { void sendGuide(); }
                 else { setStage(step => step + 1); window.scrollTo({ top: 230, behavior: "smooth" }); }

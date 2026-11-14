@@ -168,3 +168,21 @@ inmediatamente.
 Los mapas cargan de forma diferida la versión fijada de Leaflet mediante CDN.
 Requieren conexión a Internet tanto para la biblioteca como para las teselas.
 Si el mapa no carga, el administrador mantiene los campos manuales de coordenadas.
+
+
+## Centro de Guías (noviembre 2026)
+
+- La navegación pública se denomina **Guías** y abre `/guias`, una portada editorial con cuatro opciones que no muestra ningún formulario hasta elegir el objetivo.
+- **Compra:** `/guias/compra`, conserva el cuestionario de compra previamente existente, incluyendo crédito/contado, ingreso, residencia, inmueble y documentación.
+- **Venta:** `/guias/venta`, distingue inmueble, ubicación general, escritura, cargas, ocupación, fecha deseada y precio orientativo.
+- **Buscar local en renta:** `/guias/buscar-renta`, pregunta actividad comercial, zona, tamaño, presupuesto, inicio, etapa del negocio y plazo.
+- **Ofrecer un local en renta:** `/guias/ofrecer-renta`, recoge tipo de espacio, zona, metraje, estado, derecho a arrendar, disponibilidad, servicios y renta orientativa.
+- La ruta histórica `/guia-de-compra` permanece activa por compatibilidad con enlaces anteriores, y la nueva ruta `/guias/compra` reutiliza el mismo formulario.
+- Todas solicitan nombre, apellido y celular, requieren consentimiento expreso, guardan en Firestore antes de mostrar resultados y generan referencia IV-XXXXXXXX, recomendaciones adaptadas, copia, impresión y enlace a WhatsApp que incluye la referencia.
+- Todas llegan a **Admin → Guías recibidas**. Hay filtros por categoría/estado/búsqueda y acceso a las respuestas completas, celular y fecha/hora en Nicaragua. Las solicitudes de compra antiguas permanecen sin migración.
+- Firestore usa la colección existente `purchase_requests`. Los tres tipos nuevos tienen `guideType` `venta | buscar-renta | ofrecer-renta` y un mapa `answers` con campos delimitados por esquema. Compra conserva el esquema anterior sin `guideType`.
+- **Acción indispensable:** publicar el archivo `firestore.rules` actualizado en Firebase Console. El repositorio no aplica reglas automáticamente. Los nuevos formularios no mostrarán guía ni confirmación si su solicitud no queda guardada.
+- El consentimiento indica que los datos se usan para atender la solicitud; solo los dos correos administradores autorizados pueden leerlos. La validación del cliente y las reglas restringen tamaño, campos y valores.
+- Fuentes generales de orientación: Código Civil de Nicaragua (arrendamiento) y Registro Público de la Propiedad. Requisitos, tributos, permisos, garantías y disponibilidad deben confirmarse para cada caso. No se ofrece aprobación bancaria ni asesoramiento jurídico definitivo.
+
+Recomendación antes de ejecutar campañas de captación pública: habilitar verificación antispam mediante App Check o un endpoint seguro y establecer un plazo de conservación y eliminación de consultas.
