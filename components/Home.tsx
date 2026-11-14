@@ -88,6 +88,18 @@ export default function Home() {
       </div>
     </section>
 
+    <section className="iv-guide-teaser">
+      <div className="container iv-guide-teaser__inner">
+        <div className="iv-guide-teaser__symbol" aria-hidden="true"><img src="/isabel-emblema.svg" alt=""/></div>
+        <div className="iv-guide-teaser__copy">
+          <p className="iv-eyebrow">GUÍA DE COMPRA</p>
+          <h2>¿Vas a comprar una propiedad?</h2>
+          <p>Conocé los requisitos y pasos según tu forma de pago y el tipo de inmueble.</p>
+        </div>
+        <Link href="/guia-de-compra" className="iv-guide-teaser__link">Ver mi guía <ArrowUpRight size={18}/></Link>
+      </div>
+    </section>
+
     <section className="iv-introduction">
       <div className="container iv-introduction__inner">
         <div>
