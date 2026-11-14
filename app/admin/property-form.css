@@ -21,4 +21,3 @@
   .admin-category-panel__tag {display:inline-block;margin-top:14px;}
   .admin-category-panel__options {grid-template-columns:1fr;}
 }
-@media(max-width:680px) {.demo-manager__remove {padding:8px 10px;}.demo-manager__hidden > div {align-items:flex-start;}}
