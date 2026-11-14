@@ -92,14 +92,14 @@ export default function AdminPage() {
   async function updateDemoVisibility(id: string, hide: boolean) {
     const property = demoProperties.find(item => item.id === id);
     if (!db || !property || demoSaving) return;
-    if (hide && !window.confirm("¿Quitar del sitio la propiedad de demostración \"" + property.title + "\"? Se ocultará también su ficha pública.")) return;
+    if (hide && !window.confirm("¿Retirar de la lista interna la propiedad de demostración \"" + property.title + "\"? La ficha no se ofrece públicamente.")) return;
     setDemoSaving(id);
     setError("");
     try {
       await setDoc(doc(db, "site", "public"), {
         hiddenDemoIds: hide ? arrayUnion(id) : arrayRemove(id)
       }, { merge: true });
-      flash(hide ? "Propiedad DEMO retirada de la web pública." : "Propiedad DEMO restaurada.");
+      flash(hide ? "Propiedad DEMO retirada de la lista interna." : "Propiedad DEMO restaurada a la lista interna.");
     } catch {
       setError("No se pudo guardar el cambio de las propiedades DEMO.");
     } finally {
@@ -297,8 +297,8 @@ export default function AdminPage() {
           <div className="admin-panel">{properties.length ? <div className="admin-list">{properties.map(property => <div className="admin-list__row" key={property.id}><img src={property.images?.[0] || "/property-fallback.svg"} alt="" width={76} height={57} /><div><strong>{property.title}</strong><small>{property.city} · {money(property.price)}</small></div><span className={property.published ? "admin-tag admin-tag--on" : "admin-tag"}>{property.published ? "Publicada" : "Borrador"}</span><div className="admin-list__actions"><button onClick={() => toggleProperty(property)} title={property.published ? "Pasar a borrador" : "Publicar"}><Globe2 size={17}/></button><button onClick={() => startEdit(property)} title="Editar"><FilePenLine size={17}/></button><button className="admin-danger" onClick={() => removeProperty(property)} title="Eliminar"><Trash2 size={17}/></button></div></div>)}</div> : <div className="admin-empty"><Building2 size={30}/><h3>Tu catálogo empieza aquí.</h3><p>Crea una propiedad y comienza a construir tu portafolio.</p><button className="btn btn--dark" onClick={startNew}>Agregar primera propiedad <Plus size={17}/></button></div>}</div>
           <div className="admin-panel demo-manager">
             <div className="admin-panel__title">
-              <div><h3>Propiedades DEMO</h3><p className="demo-manager__description">Estas son las seis fichas ilustrativas de la web. No son propiedades reales ni anuncios almacenados en Firestore. Podés retirarlas individualmente.</p></div>
-              <span className="demo-manager__counter">{visibleDemos.length} visibles</span>
+              <div><h3>Propiedades DEMO</h3><p className="demo-manager__description">Seis fichas de prueba, visibles solo en el administrador. No forman parte del catálogo público. Podés retirarlas individualmente.</p></div>
+              <span className="demo-manager__counter">{visibleDemos.length} pendientes</span>
             </div>
             {visibleDemos.length > 0 ? <div className="admin-list">
               {visibleDemos.map(property => <div className="admin-list__row" key={property.id}>
@@ -310,13 +310,13 @@ export default function AdminPage() {
                   <Trash2 size={17}/> Quitar
                 </button>
               </div>)}
-            </div> : <p className="admin-empty">Ya no hay propiedades de demostración visibles.</p>}
+            </div> : <p className="admin-empty">Ya retiraste todos los ejemplos de la lista interna.</p>}
             {hiddenDemos.length > 0 && <div className="demo-manager__hidden">
-              <strong>Retiradas ({hiddenDemos.length})</strong>
+              <strong>Ejemplos archivados ({hiddenDemos.length})</strong>
               {hiddenDemos.map(property => <div key={property.id}>
                 <span>{property.title}</span>
                 <button type="button" disabled={demoSaving !== null}
-                  onClick={() => void updateDemoVisibility(property.id, false)}>Restaurar</button>
+                  onClick={() => void updateDemoVisibility(property.id, false)}>Restaurar ejemplo</button>
               </div>)}
             </div>}
           </div>
